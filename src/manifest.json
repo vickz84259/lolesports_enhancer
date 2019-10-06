@@ -1,0 +1,9 @@
+{
+  "manifest_version": 2,
+  "name": "LolEsports Enhancer",
+
+  "version": "0.1",
+  "version_name": "1.0.0-alpha",
+
+  "description": "Enhances the user experience of using the LolEsports website"
+}
