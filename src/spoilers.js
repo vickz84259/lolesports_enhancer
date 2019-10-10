@@ -72,6 +72,9 @@ function hideSpoiler(match) {
 }
 
 function observeMatches() {
+  // This observer is used after the page has loaded and the initial schedule
+  // list has been displayed. It only keeps track of changes to the Events list
+  // and its children.
   INFO.observer = new MutationObserver(mutationRecords => {
     for (let mutationRecord of mutationRecords) {
       let event = mutationRecord.target;
@@ -89,6 +92,7 @@ function observeMatches() {
 }
 
 function* filteredNodes(nodes) {
+  // Generator to filter and yield only nodes of type Element.
   for (let node of nodes) {
     if (node.nodeType === 1) {
       yield node;
@@ -135,11 +139,16 @@ function init() {
 }
 
 function initBaseObserver() {
+  // The initial observer looks for changes within the body tag and its
+  // descendants. This is only reasonable when first visiting the page.
   INFO.observer = new MutationObserver(mutationRecords => {
     for (let node of recordsIterator(mutationRecords)) {
       if (node.classList.contains('Event')) {
         /* beautify preserve:start */
         processEventNode(node);
+
+        // Status message to have this observer disconnected and the second
+        // observer connected.
         setToStorage(INFO.tabId, { status: 'connect' });
         /* beautify preserve:end */
         break;

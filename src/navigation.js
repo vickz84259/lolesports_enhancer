@@ -21,6 +21,8 @@ function main() {
       },
       {
         schemes: ['https'],
+        // This caters for the cases where there's another sub domain apart from
+        // watch. e.g. https://watch.euw.lolesports.com
         hostContains: '.lolesports.com'
       }]
     }
@@ -32,6 +34,9 @@ function navigationListener(details) {
   let port = PORTS.get(details.tabId);
 
   let message = {
+    // Since the tabId is already being used to track the different connection
+    // ports, sending it to content scripts to use in storage keys helps when
+    // it comes to cleanup.
     tabId: details.tabId,
     url: details.url
   };
