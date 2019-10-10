@@ -29,6 +29,7 @@ function navigationListener(details) {
   let port = PORTS.get(details.tabId);
 
   let message = {
+    tabId: details.tabId,
     url: details.url
   };
   port.postMessage(message);
