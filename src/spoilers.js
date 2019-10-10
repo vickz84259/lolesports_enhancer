@@ -72,7 +72,7 @@ function hideSpoiler(match) {
 }
 
 function observeMatches() {
-  let observer = new MutationObserver(mutationRecords => {
+  INFO.observer = new MutationObserver(mutationRecords => {
     for (let mutationRecord of mutationRecords) {
       let event = mutationRecord.target;
       for (let eventMatch of event.getElementsByClassName('EventMatch')) {
@@ -85,7 +85,7 @@ function observeMatches() {
     childList: true,
   };
   let targetElement = document.body.querySelector('.Schedule .events .Event');
-  observer.observe(targetElement, config);
+  INFO.observer.observe(targetElement, config);
 }
 
 function* filteredNodes(nodes) {
@@ -111,13 +111,37 @@ function processEventNode(node) {
 }
 
 function init() {
-  let observer = new MutationObserver((mutationRecords, observer) => {
+  let port = browser.runtime.connect();
+  port.onMessage.addListener(message => INFO.handleMessage(message));
+
+  browser.storage.onChanged.addListener(changes => {
+    if (INFO.tabId in changes) {
+      let newValue = JSON.parse(changes[INFO.tabId].newValue);
+      let status = newValue.status;
+
+      if (status === 'initial') {
+        initBaseObserver();
+
+      } else if (status === 'connect') {
+        INFO.observer.disconnect();
+        observeMatches();
+
+      } else if (status === 'disconnect') {
+        INFO.observer.disconnect();
+        INFO.observer = null;
+      }
+    }
+  });
+}
+
+function initBaseObserver() {
+  INFO.observer = new MutationObserver(mutationRecords => {
     for (let node of recordsIterator(mutationRecords)) {
       if (node.classList.contains('Event')) {
+        /* beautify preserve:start */
         processEventNode(node);
-
-        observer.disconnect();
-        observeMatches();
+        setToStorage(INFO.tabId, { status: 'connect' });
+        /* beautify preserve:end */
         break;
       }
     }
@@ -127,12 +151,7 @@ function init() {
     childList: true,
     subtree: true,
   };
-  observer.observe(document.body, config);
-
-  let port = browser.runtime.connect();
-  port.onMessage.addListener(message => INFO.handleMessage(message));
-
-  browser.storage.onChanged.addListener(changes => console.log(changes));
+  INFO.observer.observe(document.body, config);
 }
 
 function isEmpty(object) {
