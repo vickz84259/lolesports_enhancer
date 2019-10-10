@@ -6,7 +6,10 @@ function main() {
     PORTS.set(tabId, port);
   });
 
-  browser.tabs.onRemoved.addListener(tabId => PORTS.delete(tabId));
+  browser.tabs.onRemoved.addListener(tabId => {
+    PORTS.delete(tabId);
+    browser.storage.local.remove(tabId.toString());
+  });
 
   /* beautify preserve:start */
   browser.webNavigation.onHistoryStateUpdated.addListener(
