@@ -8,7 +8,16 @@
   "description": "Enhances the user experience of using the LolEsports website",
 
   "content_scripts": [{
-    "matches": ["https://*.lolesports.com/schedule*"],
+    "matches": ["https://watch.lolesports.com/*", "https://*.lolesports.com/*"],
     "js": ["spoilers.js"]
-  }]
+  }],
+
+  "background": {
+    "scripts": ["navigation.js"]
+  },
+
+  "permissions": [
+    "webNavigation",
+    "storage"
+  ]
 }
