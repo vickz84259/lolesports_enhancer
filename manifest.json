@@ -9,11 +9,11 @@
 
   "content_scripts": [{
     "matches": ["https://watch.lolesports.com/*", "https://*.lolesports.com/*"],
-    "js": ["spoilers.js"]
+    "js": ["builds/spoilers.js"]
   }],
 
   "background": {
-    "scripts": ["navigation.js"]
+    "scripts": ["src/navigation.js"]
   },
 
   "permissions": [
