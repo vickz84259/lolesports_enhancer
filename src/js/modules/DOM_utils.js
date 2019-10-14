@@ -6,11 +6,10 @@ async function getElement(id = null, selector = null) {
   between each call */
   while (true) {
     let result = (id) ? document.getElementById(id) : document.querySelector(selector);
-    if (result) break;
+    if (result) return result;
 
     await delay();
   }
-  return result;
 }
 
 function getElementById(id) {
