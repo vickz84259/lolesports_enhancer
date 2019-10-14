@@ -27,5 +27,6 @@ function getHandler(properties) {
       tabState.action = 'disconnect';
     }
     properties.handler(tabState);
+    tabState.action = '';
   }
 }
