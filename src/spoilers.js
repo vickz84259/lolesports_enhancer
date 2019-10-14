@@ -94,4 +94,9 @@ function statusHandler(tabState) {
 }
 
 let link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/schedule(?:\?\S+)?$/;
-link_state.connect(link_regex, statusHandler);
+let properties = {
+  portName: 'spoilers',
+  regexPattern: link_regex,
+  handler: statusHandler
+};
+link_state.connect(properties);
