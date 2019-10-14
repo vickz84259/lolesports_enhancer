@@ -6,10 +6,7 @@ function main() {
     PORTS.set(tabId, port);
   });
 
-  browser.tabs.onRemoved.addListener(tabId => {
-    PORTS.delete(tabId);
-    browser.storage.local.remove(tabId.toString());
-  });
+  browser.tabs.onRemoved.addListener(tabId => PORTS.delete(tabId));
 
   /* beautify preserve:start */
   browser.webNavigation.onHistoryStateUpdated.addListener(
@@ -32,15 +29,7 @@ function main() {
 
 function navigationListener(details) {
   let port = PORTS.get(details.tabId);
-
-  let message = {
-    // Since the tabId is already being used to track the different connection
-    // ports, sending it to content scripts to use in storage keys helps when
-    // it comes to cleanup.
-    tabId: details.tabId,
-    url: details.url
-  };
-  port.postMessage(message);
+  port.postMessage({ url: details.url });
 }
 
 main();

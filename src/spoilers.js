@@ -1,11 +1,7 @@
 'use strict';
 
-import { Info } from './script_info.js';
+import * as link_state from './link_state.js';
 import * as mutation from './mutation.js';
-import * as utils from './utils.js';
-
-const LINK_REGEX = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/schedule(?:\?\S+)?$/;
-const INFO = new Info(LINK_REGEX);
 
 function hideSpoiler(match) {
   let link = match.querySelector('a.past');
@@ -42,11 +38,11 @@ function hideSpoiler(match) {
   }
 }
 
-function observeMatches() {
+function observeMatches(tabState) {
   // This observer is used after the page has loaded and the initial schedule
   // list has been displayed. It only keeps track of changes to the Events list
   // and its children.
-  INFO.observer = new MutationObserver(mutationRecords => {
+  tabState.observer = new MutationObserver(mutationRecords => {
     for (let mutationRecord of mutationRecords) {
       let event = mutationRecord.target;
       for (let eventMatch of event.getElementsByClassName('EventMatch')) {
@@ -56,7 +52,7 @@ function observeMatches() {
   });
 
   let targetElement = document.body.querySelector('.Schedule .events .Event');
-  INFO.observer.observe(targetElement, { childList: true });
+  tabState.observer.observe(targetElement, { childList: true });
 }
 
 function processEventNode(node) {
@@ -67,48 +63,35 @@ function processEventNode(node) {
   }
 }
 
-function init() {
-  let port = browser.runtime.connect();
-  port.onMessage.addListener(message => INFO.handleMessage(message));
-
-  browser.storage.onChanged.addListener(changes => {
-    if (INFO.tabId in changes) {
-      let newValue = JSON.parse(changes[INFO.tabId].newValue);
-      let status = newValue.status;
-
-      if (status === 'initial') {
-        initBaseObserver();
-
-      } else if (status === 'connect') {
-        INFO.observer.disconnect();
-        observeMatches();
-
-      } else if (status === 'disconnect') {
-        INFO.observer.disconnect();
-        INFO.observer = null;
-      }
-    }
-  });
-}
-
-function initBaseObserver() {
+function initBaseObserver(tabState) {
   // The initial observer looks for changes within the body tag and its
   // descendants. This is only reasonable when first visiting the page.
-  INFO.observer = new MutationObserver(mutationRecords => {
+  tabState.observer = new MutationObserver(mutationRecords => {
     for (let node of mutation.recordsIterator(mutationRecords)) {
       if (node.classList.contains('Event')) {
         processEventNode(node);
 
-        // Status message to have this observer disconnected and the second
-        // observer connected.
-        utils.setToStorage(INFO.tabId, { status: 'connect' });
+        // Disconnecting this observer and initialising the second one.
+        tabState.observer.disconnect();
+        observeMatches(tabState);
         break;
       }
     }
   });
 
   let config = { childList: true, subtree: true };
-  INFO.observer.observe(document.body, config);
+  tabState.observer.observe(document.body, config);
 }
 
-init();
+function statusHandler(tabState) {
+  if (tabState.action === 'initialise') {
+    initBaseObserver(tabState);
+
+  } else if (tabState.action === 'disconnect') {
+    tabState.observer.disconnect();
+    tabState.observer = null;
+  }
+}
+
+let link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/schedule(?:\?\S+)?$/;
+link_state.connect(link_regex, statusHandler);
