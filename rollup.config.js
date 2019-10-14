@@ -1,5 +1,5 @@
 export default {
-  input: 'src/spoilers.js',
+  input: 'src/js/content_scripts/spoilers.js',
   output: {
     file: 'builds/spoilers.js',
     format: 'iife'

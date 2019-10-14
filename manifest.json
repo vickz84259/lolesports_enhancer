@@ -13,7 +13,7 @@
   }],
 
   "background": {
-    "scripts": ["src/navigation.js"]
+    "scripts": ["src/js/background_scripts/navigation.js"]
   },
 
   "permissions": [

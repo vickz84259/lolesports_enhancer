@@ -1,7 +1,7 @@
 'use strict';
 
-import * as link_state from './link_state.js';
-import * as mutation from './mutation.js';
+import * as link_state from '../modules/link_state.js';
+import * as mutation from '../modules/mutation.js';
 
 function hideSpoiler(match) {
   let link = match.querySelector('a.past');
