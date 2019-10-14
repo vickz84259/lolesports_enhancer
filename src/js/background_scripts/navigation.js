@@ -17,11 +17,13 @@ function main() {
   });
 
   browser.tabs.onRemoved.addListener(tabId => {
-    let ids = IDS_MAP.get(tabId);
-    for (let id of ids) {
-      PORTS.delete(id);
+    if (IDS_MAP.has(tabId)) {
+      let ids = IDS_MAP.get(tabId);
+      for (let id of ids) {
+        PORTS.delete(id);
+      }
+      IDS_MAP.delete(tabId);
     }
-    IDS_MAP.delete(tabId);
   });
 
   /* beautify preserve:start */
