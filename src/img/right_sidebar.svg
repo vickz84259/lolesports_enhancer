@@ -63,12 +63,11 @@
         <g
            transform="translate(314,92)"
            id="g4"
-           style="fill:none">
+           style="fill:#FFFFFF">
           <path
              class="shape"
              d="m 7,15 h 15 v 4 H 7 2 V 5 H 7 Z M 0,21 H 24 V 3 H 0 Z M 2,19 H 22 V 5 H 2 Z"
              id="path2"
-             style="fill:#FFFFFF"
              inkscape:connector-curvature="0" />
         </g>
       </g>
