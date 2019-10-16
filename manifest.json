@@ -20,6 +20,8 @@
     "scripts": ["src/js/background_scripts/navigation.js"]
   },
 
+  "web_accessible_resources": ["src/img/right_sidebar.svg"],
+
   "permissions": [
     "webNavigation",
     "storage"
