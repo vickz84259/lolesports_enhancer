@@ -10,6 +10,7 @@
   "content_scripts": [{
     "matches": ["https://watch.lolesports.com/*", "https://*.lolesports.com/*"],
     "js": [
+      "src/js/external/purify.min.js",
       "builds/spoilers.js",
       "builds/vod.js"
     ],
