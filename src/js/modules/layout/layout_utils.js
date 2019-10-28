@@ -1,7 +1,13 @@
 import { getFromStorage, setToStorage } from '../utils.js';
 import { getElementBySelector } from '../DOM_utils.js';
 
-export { getCurrentLayout, setCurrentLayout, Layouts };
+export {
+  getCurrentLayout as getCurrent,
+  setCurrentLayout as setCurrent,
+  getOppositeLayout as getOpposite,
+  Layouts, getSelectedOption, getOptions, getOptionsList, isLeftSB, isRightSB,
+  isTheatre,
+};
 
 /* Creating an Enum to hold the various layout options.
   This will be achieved by freezing an object */
@@ -31,4 +37,29 @@ function setCurrentLayout(layout) {
   } else {
     throw new Error('Incorrect layout type given');
   }
+}
+
+let getOptionsList = () => getElementBySelector('.layouts.options-list');
+
+async function* getOptions() {
+  let optionsList = await getOptionsList();
+  for (let option of optionsList.childNodes) {
+    yield option;
+  }
+}
+
+async function getSelectedOption() {
+  for await (let option of getOptions()) {
+    if (option.classList.contains('selected')) {
+      return option;
+    }
+  }
+}
+
+let isLeftSB = layout => layout === Layouts.SIDEBAR_LEFT;
+let isRightSB = layout => layout === Layouts.SIDEBAR_RIGHT;
+let isTheatre = layout => layout === Layouts.THEATRE;
+
+function getOppositeLayout(layout) {
+  return (isLeftSB(layout)) ? Layouts.SIDEBAR_RIGHT : Layouts.SIDEBAR_LEFT;
 }
