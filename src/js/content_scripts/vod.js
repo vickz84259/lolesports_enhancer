@@ -2,7 +2,7 @@
 
 import * as link_state from '../modules/link_state.js';
 import { getElementBySelector } from '../modules/DOM_utils.js';
-import { setUpLayoutObserver } from '../modules/layout/sidebar.js';
+import { init } from '../modules/layout/sidebar.js';
 
 /* Currently the function works as intended but there are improvements that needed.
 TODO:
@@ -21,7 +21,7 @@ function statusHandler(tabState) {
   if (tabState.action === 'initialise') {
     // moveCookieButton();
 
-    setUpLayoutObserver(tabState);
+    init(tabState);
   } else if (tabState.action === 'disconnect') {
     tabState.observer.disconnect();
     tabState.observer = null;

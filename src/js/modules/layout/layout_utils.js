@@ -17,16 +17,27 @@ const Layouts = Object.freeze({
   SIDEBAR_RIGHT: 'Sidebar Right'
 });
 
-async function getCurrentLayout() {
+
+async function _getCurrentLayout() {
+  // Retrieves the current layout being displayed
+  let mainArea = await getElementBySelector('.Watch.large');
+  if (mainArea.children.length === 2) {
+    let style = window.getComputedStyle(mainArea);
+    let flexDirection = style.getPropertyValue('flex-direction');
+
+    return (flexDirection === 'row-reverse') ? Layouts.SIDEBAR_RIGHT : Layouts.SIDEBAR_LEFT;
+  }
+
+  return Layouts.THEATRE;
+}
+
+async function getCurrentLayout(fromStorage = true) {
+  if (!fromStorage) return (await _getCurrentLayout());
+
   let layout = await getFromStorage('layout');
   if (layout === 'None') {
-    let mainArea = await getElementBySelector('.Watch.large');
-    let noOfChildren = mainArea.children.length;
-
-    let currentLayout = (noOfChildren === 2) ? Layouts.SIDEBAR_LEFT : Layouts.THEATRE;
-    setCurrentLayout(currentLayout);
-
-    layout = currentLayout
+    layout = await _getCurrentLayout();
+    setCurrentLayout(layout);
   }
   return layout;
 }

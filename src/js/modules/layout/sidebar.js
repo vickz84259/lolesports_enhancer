@@ -3,7 +3,7 @@ import * as layout from './layout_utils.js';
 import { getElementBySelector, getElementById } from '../DOM_utils.js';
 import { getFromStorage, setToStorage } from '../utils.js';
 
-export { setUpLayoutObserver };
+export { init };
 
 
 // The values stored will be of boolean type
@@ -70,13 +70,13 @@ async function moveSideBar(newLayout) {
   }
 }
 
-async function changeLayout(newLayout) {
+async function changeLayout(newLayout, init = false) {
   let currentLayout = await layout.getCurrent();
   if (layout.isLeftSB(newLayout) || layout.isRightSB(newLayout)) {
     // Move the sidebar from the bottom to the top
     if (layout.isTheatre(currentLayout)) moveSideBar(newLayout);
 
-    if (currentLayout !== newLayout) {
+    if (currentLayout !== newLayout || init) {
       // move the side bar left or right
       let isLeftSB = layout.isLeftSB(newLayout);
       let flex = (isLeftSB) ? 'flex-direction: row;' : 'flex-direction: row-reverse;';
@@ -94,8 +94,9 @@ async function changeLayout(newLayout) {
     if (layout.isRightSB(currentLayout)) moveSideBar(newLayout);
   }
 
-  if (layout.isRightSB(newLayout)) {
+  if (layout.isRightSB(newLayout) && !init) {
     // close the options button
+    // The init check prevents from this leading to the options button being opened
     let optionsButton = await getElementBySelector('.options-button');
     optionsButton.click();
   }
@@ -171,7 +172,7 @@ async function setUpLayoutObserver(tabState) {
   tabState.observer.observe((await targetElement), config);
 }
 
-async function init() {
+async function init(tabState) {
   let result = await getFromStorage(MAX_VIDEO_SIZE_KEY);
   if (result === 'None') {
     // Setup the max video player size
@@ -182,6 +183,14 @@ async function init() {
     value += (await getVideoPlayerWidth());
     setToStorage(MAX_VIDEO_SIZE_KEY, value);
   }
-}
 
-init();
+  setUpLayoutObserver(tabState);
+
+  // Change the layout to the Right sidebar if it is the user's current option
+  let savedLayout = await layout.getCurrent();
+  let displayedLayout = await layout.getCurrent(false);
+  if (layout.isRightSB(savedLayout)) {
+    if (layout.isTheatre(displayedLayout)) moveSideBar(savedLayout);
+    changeLayout(savedLayout, true);
+  }
+}
