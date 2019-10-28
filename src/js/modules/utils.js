@@ -5,10 +5,11 @@ function assertStorageType(storageType) {
   if (!storageTypes.includes(storageType)) throw new Error('Wrong storage type');
 }
 
-function getFromStorage(key, defaultValue = 'None', storageType = 'local') {
+async function getFromStorage(key, defaultValue = 'None', storageType = 'local') {
   /* beautify preserve:start */
   assertStorageType(storageType);
-  return browser.storage[storageType].get({ [key]: defaultValue });
+  let result = await browser.storage[storageType].get({ [key]: defaultValue });
+  return result[key];
   /* beautify preserve:end */
 }
 

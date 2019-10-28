@@ -18,17 +18,17 @@ const Layouts = Object.freeze({
 });
 
 async function getCurrentLayout() {
-  let result = await getFromStorage('layout');
-  if (result.layout === 'None') {
+  let layout = await getFromStorage('layout');
+  if (layout === 'None') {
     let mainArea = await getElementBySelector('.Watch.large');
     let noOfChildren = mainArea.children.length;
 
-    let layout = (noOfChildren === 2) ? Layouts.SIDEBAR_LEFT : Layouts.THEATRE;
-    setCurrentLayout(layout);
+    let currentLayout = (noOfChildren === 2) ? Layouts.SIDEBAR_LEFT : Layouts.THEATRE;
+    setCurrentLayout(currentLayout);
 
-    result = { layout };
+    layout = currentLayout
   }
-  return result.layout;
+  return layout;
 }
 
 function setCurrentLayout(layout) {

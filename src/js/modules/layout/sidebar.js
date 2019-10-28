@@ -31,8 +31,7 @@ async function getVideoPlayerWidth() {
 }
 
 async function getMaxVideoWidth() {
-  let result = await getFromStorage(MAX_VIDEO_SIZE_KEY);
-  return result[MAX_VIDEO_SIZE_KEY];
+  return (await getFromStorage(MAX_VIDEO_SIZE_KEY));
 }
 
 async function moveSideBar(newLayout) {
@@ -174,7 +173,7 @@ async function setUpLayoutObserver(tabState) {
 
 async function init() {
   let result = await getFromStorage(MAX_VIDEO_SIZE_KEY);
-  if (result[MAX_VIDEO_SIZE_KEY] === 'None') {
+  if (result === 'None') {
     // Setup the max video player size
     let currentLayout = await layout.getCurrent();
     let notTheatre = layout.isLeftSB(currentLayout) || layout.isRightSB(currentLayout);
