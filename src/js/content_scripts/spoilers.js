@@ -38,11 +38,11 @@ function hideSpoiler(match) {
   }
 }
 
-function observeMatches(tabState) {
+function observeMatches() {
   // This observer is used after the page has loaded and the initial schedule
   // list has been displayed. It only keeps track of changes to the Events list
   // and its children.
-  tabState.observer = new MutationObserver(mutationRecords => {
+  let observer = new MutationObserver(mutationRecords => {
     for (let mutationRecord of mutationRecords) {
       let event = mutationRecord.target;
       for (let eventMatch of event.getElementsByClassName('EventMatch')) {
@@ -52,7 +52,9 @@ function observeMatches(tabState) {
   });
 
   let targetElement = document.body.querySelector('.Schedule .events .Event');
-  tabState.observer.observe(targetElement, { childList: true });
+  observer.observe(targetElement, { childList: true });
+
+  return observer;
 }
 
 function processEventNode(node) {
@@ -66,30 +68,27 @@ function processEventNode(node) {
 function initBaseObserver(tabState) {
   // The initial observer looks for changes within the body tag and its
   // descendants. This is only reasonable when first visiting the page.
-  tabState.observer = new MutationObserver(mutationRecords => {
+  let observer = new MutationObserver((mutationRecords, currentObserver) => {
     for (let node of mutation.recordsIterator(mutationRecords)) {
       if (node.classList.contains('Event')) {
         processEventNode(node);
 
         // Disconnecting this observer and initialising the second one.
-        tabState.observer.disconnect();
-        observeMatches(tabState);
+        currentObserver.disconnect();
+        tabState.addObserver(observeMatches());
         break;
       }
     }
   });
 
   let config = { childList: true, subtree: true };
-  tabState.observer.observe(document.body, config);
+  observer.observe(document.body, config);
+  tabState.addObserver(observer);
 }
 
 function statusHandler(tabState) {
   if (tabState.action === 'initialise') {
     initBaseObserver(tabState);
-
-  } else if (tabState.action === 'disconnect') {
-    tabState.observer.disconnect();
-    tabState.observer = null;
   }
 }
 

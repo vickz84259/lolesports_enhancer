@@ -22,9 +22,6 @@ function statusHandler(tabState) {
     // moveCookieButton();
 
     init(tabState);
-  } else if (tabState.action === 'disconnect') {
-    tabState.observer.disconnect();
-    tabState.observer = null;
   }
 }
 

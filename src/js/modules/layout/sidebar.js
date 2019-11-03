@@ -133,10 +133,10 @@ async function setExtraOption() {
   addListener(newOption, layout.Layouts.SIDEBAR_RIGHT);
 }
 
-async function setUpLayoutObserver(tabState) {
+async function setUpLayoutObserver() {
   // This observer checks if the user has opened the options to switch the stats
   // layout which triggers a mutation.
-  tabState.observer = new MutationObserver(async (mutationRecords) => {
+  let observer = new MutationObserver(async (mutationRecords) => {
     for (let element of mutation.recordsIterator(mutationRecords)) {
       if (element.className === 'WatchOptionsLayout') {
         await setExtraOption();
@@ -169,7 +169,9 @@ async function setUpLayoutObserver(tabState) {
 
   let targetElement = getElementBySelector('.Watch.large');
   let config = { childList: true, subtree: true };
-  tabState.observer.observe((await targetElement), config);
+
+  observer.observe((await targetElement), config);
+  return observer;
 }
 
 async function init(tabState) {
@@ -184,7 +186,8 @@ async function init(tabState) {
     setToStorage(MAX_VIDEO_SIZE_KEY, value);
   }
 
-  setUpLayoutObserver(tabState);
+  let observer = await setUpLayoutObserver()
+  tabState.addObserver(observer);
 
   // Change the layout to the Right sidebar if it is the user's current option
   let savedLayout = await layout.getCurrent();

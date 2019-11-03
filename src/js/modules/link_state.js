@@ -1,3 +1,14 @@
+class TabState {
+
+  constructor() {
+    this.observers = [];
+  }
+
+  addObserver(observer) {
+    this.observers.push(observer);
+  }
+}
+
 export function connect(properties) {
   // Creating a connection to the background script
   let port = browser.runtime.connect({ name: properties.portName });
@@ -10,7 +21,7 @@ function getHandler(properties) {
   let previousLink = null;
   let currentLink = null;
 
-  let tabState = {};
+  let tabState = new TabState();
 
   return function(message) {
     if (currentLink) previousLink = currentLink;
@@ -25,6 +36,13 @@ function getHandler(properties) {
     } else if (matchesPrevious && !matchesCurrent) {
       // This means the user has navigated away from the page of interest
       tabState.action = 'disconnect';
+
+      if (tabState.observers.length > 0) {
+        for (let observer of tabState.observers) observer.disconnect();
+
+        // Remove the observers
+        tabState.observers.splice(0, tabState.observers.length);
+      }
     }
     properties.handler(tabState);
     tabState.action = '';
