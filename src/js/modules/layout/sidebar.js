@@ -41,21 +41,21 @@ async function moveSideBar(newLayout) {
   let parent, sibling;
   if (layout.isRightSB(newLayout)) {
     // move the sidebar from the bottom to the top
-    sibling = getElementBySelector('.center-pane');
-    parent = await getElementBySelector('.Watch.large');
+    sibling = document.querySelector('.center-pane');
+    parent = document.querySelector('.Watch.large');
 
   } else if (layout.isTheatre(newLayout)) {
     // move the sidebar from the top to the bottom
-    sibling = getElementBySelector('.lower .nav-details');
-    parent = await getElementBySelector('.center-pane .lower');
+    sibling = document.querySelector('.lower .nav-details');
+    parent = document.querySelector('.center-pane .lower');
   }
 
-  let sideBar = await getElementBySelector('.overview-pane');
-  parent.insertBefore(sideBar, (await sibling));
+  let sideBar = document.querySelector('.overview-pane');
+  parent.insertBefore(sideBar, sibling);
 
   let videoWidth = await getVideoPlayerWidth();
   let sideBarWidth = await getSideBarWidth();
-  let videoPlayer = await getElementById('video-player');
+  let videoPlayer = document.getElementById('video-player');
 
   if (layout.isRightSB(newLayout)) {
     // reduce size of video player
@@ -81,11 +81,10 @@ async function changeLayout(newLayout, init = false) {
       let isLeftSB = layout.isLeftSB(newLayout);
       let flex = (isLeftSB) ? 'flex-direction: row;' : 'flex-direction: row-reverse;';
 
-      let mainArea = await getElementBySelector('.Watch.large');
-      mainArea.setAttribute('style', flex);
+      document.querySelector('.Watch.large').setAttribute('style', flex);
 
       // move the video player to the left or right
-      let videoPlayer = await getElementById('video-player');
+      let videoPlayer = document.getElementById('video-player');
       let videoLeftStyle = (await getSideBarWidth()) + 'px';
       videoPlayer.style.left = (isLeftSB) ? videoLeftStyle : '0px';
     }
@@ -97,15 +96,14 @@ async function changeLayout(newLayout, init = false) {
   if (layout.isRightSB(newLayout) && !init) {
     // close the options button
     // The init check prevents from this leading to the options button being opened
-    let optionsButton = await getElementBySelector('.options-button');
-    optionsButton.click();
+    document.querySelector('.options-button').click();
   }
 
   layout.setCurrent(newLayout);
 }
 
 async function setExtraOption() {
-  for await (let element of layout.getOptions()) {
+  for (let element of layout.getOptions()) {
     let firstChild = element.firstChild;
     if (firstChild.textContent === 'Sidebar') {
       // Renaming the previous option as Sidebar Left
@@ -123,8 +121,7 @@ async function setExtraOption() {
   label.textContent = layout.Layouts.SIDEBAR_RIGHT;
 
   newOption.appendChild(label);
-  let optionsList = await layout.getOptionsList();
-  optionsList.appendChild(newOption);
+  layout.getOptionsList().appendChild(newOption);
 
   let url = browser.runtime.getURL('src/img/right_sidebar.svg');
   let sidebarSVG = await (await fetch(url)).text();
@@ -142,7 +139,7 @@ async function setUpLayoutObserver() {
         await setExtraOption();
 
         // Add eventListener to theatre option
-        for await (let option of layout.getOptions()) {
+        for (let option of layout.getOptions()) {
           if (layout.isTheatre(option.firstChild.textContent)) {
             addListener(option, layout.Layouts.THEATRE);
           }
@@ -153,11 +150,10 @@ async function setUpLayoutObserver() {
         let currentLayout = await layout.getCurrent();
         if (layout.isRightSB(currentLayout)) {
           // remove the previously selected option
-          let selectedOption = await layout.getSelectedOption();
-          selectedOption.classList.remove('selected');
+          layout.getSelectedOption().classList.remove('selected');
 
           // Set the Right sidebar option as the selected one.
-          for await (let option of layout.getOptions()) {
+          for (let option of layout.getOptions()) {
             if (option.firstChild.textContent === currentLayout) {
               option.classList.add('selected');
             }
@@ -186,7 +182,7 @@ async function init(tabState) {
     setToStorage(MAX_VIDEO_SIZE_KEY, value);
   }
 
-  let observer = await setUpLayoutObserver()
+  let observer = await setUpLayoutObserver();
   tabState.addObserver(observer);
 
   // Change the layout to the Right sidebar if it is the user's current option

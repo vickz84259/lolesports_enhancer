@@ -50,17 +50,16 @@ function setCurrentLayout(layout) {
   }
 }
 
-let getOptionsList = () => getElementBySelector('.layouts.options-list');
+let getOptionsList = () => document.querySelector('.layouts.options-list');
 
-async function* getOptions() {
-  let optionsList = await getOptionsList();
-  for (let option of optionsList.children) {
+function* getOptions() {
+  for (let option of getOptionsList().children) {
     yield option;
   }
 }
 
-async function getSelectedOption() {
-  for await (let option of getOptions()) {
+function getSelectedOption() {
+  for (let option of getOptions()) {
     if (option.classList.contains('selected')) {
       return option;
     }
