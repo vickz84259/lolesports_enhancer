@@ -54,7 +54,7 @@ let getOptionsList = () => getElementBySelector('.layouts.options-list');
 
 async function* getOptions() {
   let optionsList = await getOptionsList();
-  for (let option of optionsList.childNodes) {
+  for (let option of optionsList.children) {
     yield option;
   }
 }
