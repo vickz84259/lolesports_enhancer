@@ -1,8 +1,10 @@
 'use strict';
 
 import * as link_state from '../modules/link_state.js';
+import * as stats from '../modules/stats.js';
+import * as sidebar from '../modules/layout/sidebar.js';
 import { getElementBySelector } from '../modules/DOM_utils.js';
-import { init } from '../modules/layout/sidebar.js';
+
 
 /* Currently the function works as intended but there are improvements that needed.
 TODO:
@@ -17,18 +19,10 @@ async function moveCookieButton() {
   nav.insertBefore((await cookieButton), (await streamSelector));
 }
 
-function statusHandler(tabState) {
-  if (tabState.action === 'initialise') {
-    // moveCookieButton();
-
-    init(tabState);
-  }
-}
-
 let link_regex = /https:\/\/watch\.(?:\w+\.)?lolesports\.com\/vod\/\d+\/\d{1}(?:\/[a-zA-Z0-9_\-]{11})?/;
 let properties = {
   portName: 'vod',
   regexPattern: link_regex,
-  handler: statusHandler
+  init_functions: [sidebar.init, stats.init]
 };
 link_state.connect(properties);

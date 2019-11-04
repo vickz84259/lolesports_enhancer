@@ -32,11 +32,12 @@ function getHandler(properties) {
 
     if (!matchesPrevious && matchesCurrent) {
       // This means the user has navigated to the page of interest
-      tabState.action = 'initialise';
+      for (let handler of properties.init_functions) {
+        handler(tabState);
+      }
+
     } else if (matchesPrevious && !matchesCurrent) {
       // This means the user has navigated away from the page of interest
-      tabState.action = 'disconnect';
-
       if (tabState.observers.length > 0) {
         for (let observer of tabState.observers) observer.disconnect();
 
@@ -44,7 +45,5 @@ function getHandler(properties) {
         tabState.observers.splice(0, tabState.observers.length);
       }
     }
-    properties.handler(tabState);
-    tabState.action = '';
   }
 }

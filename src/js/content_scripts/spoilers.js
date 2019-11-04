@@ -86,16 +86,10 @@ function initBaseObserver(tabState) {
   tabState.addObserver(observer);
 }
 
-function statusHandler(tabState) {
-  if (tabState.action === 'initialise') {
-    initBaseObserver(tabState);
-  }
-}
-
 let link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/schedule(?:\?\S+)?$/;
 let properties = {
   portName: 'spoilers',
   regexPattern: link_regex,
-  handler: statusHandler
+  init_functions: [initBaseObserver]
 };
 link_state.connect(properties);
