@@ -44,6 +44,10 @@ function getHandler(properties) {
         // Remove the observers
         tabState.observers.splice(0, tabState.observers.length);
       }
+
+      for (let handler of properties.cleanup_functions) {
+        handler();
+      }
     }
   }
 }

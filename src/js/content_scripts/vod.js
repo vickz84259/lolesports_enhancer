@@ -23,6 +23,7 @@ let link_regex = /https:\/\/watch\.(?:\w+\.)?lolesports\.com\/vod\/\d+\/\d{1}(?:
 let properties = {
   portName: 'vod',
   regexPattern: link_regex,
-  init_functions: [sidebar.init, stats.init]
+  init_functions: [sidebar.init, stats.init],
+  cleanup_functions: []
 };
 link_state.connect(properties);

@@ -90,6 +90,7 @@ let link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/schedule(?:\?\S+)
 let properties = {
   portName: 'spoilers',
   regexPattern: link_regex,
-  init_functions: [initBaseObserver]
+  init_functions: [initBaseObserver],
+  cleanup_functions: []
 };
 link_state.connect(properties);
