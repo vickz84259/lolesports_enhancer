@@ -24,6 +24,6 @@ let properties = {
   portName: 'vod',
   regexPattern: link_regex,
   init_functions: [sidebar.init, stats.init],
-  cleanup_functions: []
+  cleanup_functions: [stats.disconnect]
 };
 link_state.connect(properties);
