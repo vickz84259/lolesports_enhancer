@@ -26,5 +26,19 @@
   "permissions": [
     "webNavigation",
     "storage"
-  ]
+  ],
+
+  "icons": {
+    "48": "src/img/logo_48.png",
+    "96": "src/img/logo_96.png"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "16": "src/img/logo_dark_16.png",
+      "32": "src/img/logo_dark_32.png"
+    },
+
+    "default_title": "LoL Esports Enhancer"
+  }
 }
