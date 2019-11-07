@@ -12,8 +12,7 @@ function my_copy() {
       { src: 'src/img', dest: firefoxDir },
       { src: 'src/json', dest: firefoxDir },
       { src: 'src/js/background_scripts', dest: `${jsFirefoxDir}` },
-      { src: 'src/js/external', dest: `${jsFirefoxDir}` },
-      { src: 'src/js/internal', dest: `${jsFirefoxDir}` }
+      { src: 'src/js/external', dest: `${jsFirefoxDir}` }
     ],
   });
 }
