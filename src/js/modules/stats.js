@@ -1,10 +1,9 @@
 import * as mutation from './mutation.js';
 import { getFromStorage } from './utils.js';
 import { getElementBySelector } from './DOM_utils';
+import { ALLY_TEAMS } from './keys.js'
 
 export { init, disconnect };
-
-const ALLY_TEAMS_KEY = 'ally_teams';
 
 
 class StatsInfo {
@@ -99,7 +98,7 @@ async function setUpStatsObserver(tabState) {
 }
 
 async function init(tabState) {
-  let allyTeams = await getFromStorage(ALLY_TEAMS_KEY);
+  let allyTeams = await getFromStorage(ALLY_TEAMS);
   if (allyTeams !== 'None') {
     let teams = await getTeams();
     for (let team of teams) {
