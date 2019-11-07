@@ -10,18 +10,21 @@
   "content_scripts": [{
     "matches": ["https://watch.lolesports.com/*", "https://*.lolesports.com/*"],
     "js": [
-      "src/js/external/purify.min.js",
-      "builds/spoilers.js",
-      "builds/vod.js"
+      "js/external/purify.min.js",
+      "js/content_scripts/spoilers.js",
+      "js/content_scripts/vod.js"
     ],
-    "css": ["src/css/vod.css"]
+    "css": ["css/vod.css"]
   }],
 
   "background": {
-    "scripts": ["src/js/background_scripts/navigation.js"]
+    "scripts": [
+      "js/background_scripts/navigation.js",
+      "js/background_scripts/settings.js"
+    ]
   },
 
-  "web_accessible_resources": ["src/img/right_sidebar.svg"],
+  "web_accessible_resources": ["img/right_sidebar.svg"],
 
   "permissions": [
     "webNavigation",
@@ -29,14 +32,14 @@
   ],
 
   "icons": {
-    "48": "src/img/logo_48.png",
-    "96": "src/img/logo_96.png"
+    "48": "img/logo_48.png",
+    "96": "img/logo_96.png"
   },
 
   "browser_action": {
     "default_icon": {
-      "16": "src/img/logo_dark_16.png",
-      "32": "src/img/logo_dark_32.png"
+      "16": "img/logo_dark_16.png",
+      "32": "img/logo_dark_32.png"
     },
 
     "default_title": "LoL Esports Enhancer"

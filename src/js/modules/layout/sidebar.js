@@ -123,7 +123,7 @@ async function setExtraOption() {
   newOption.appendChild(label);
   layout.getOptionsList().appendChild(newOption);
 
-  let url = browser.runtime.getURL('src/img/right_sidebar.svg');
+  let url = browser.runtime.getURL('img/right_sidebar.svg');
   let sidebarSVG = await (await fetch(url)).text();
 
   newOption.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sidebarSVG));
