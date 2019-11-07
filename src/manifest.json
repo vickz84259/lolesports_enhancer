@@ -43,5 +43,9 @@
     },
 
     "default_title": "LoL Esports Enhancer"
+  },
+
+  "options_ui": {
+    "page": "html/settings.html"
   }
 }
