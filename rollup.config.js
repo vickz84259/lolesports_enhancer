@@ -1,4 +1,5 @@
 import copy from 'rollup-plugin-copy';
+import resolve from 'rollup-plugin-node-resolve';
 
 let firefoxDir = 'builds/firefox';
 let jsFirefoxDir = `${firefoxDir}/js`;
@@ -11,7 +12,7 @@ function my_copy() {
       { src: 'src/html', dest: firefoxDir },
       { src: 'src/img', dest: firefoxDir },
       { src: 'src/json', dest: firefoxDir },
-      { src: 'src/js/background_scripts', dest: `${jsFirefoxDir}` },
+      { src: 'src/js/background_scripts/navigation.js', dest: `${jsFirefoxDir}/background_scripts` },
       { src: 'src/js/external', dest: `${jsFirefoxDir}` }
     ],
   });
@@ -41,4 +42,18 @@ export default [{
       format: 'iife'
     }
   },
+  {
+    input: 'src/js/background_scripts/settings.js',
+    output: {
+      file: `${jsFirefoxDir}/background_scripts/settings.js`,
+      format: 'iife',
+    },
+    plugins: [
+      resolve({
+        customResolveOptions: {
+          moduleDirectory: 'node_modules'
+        }
+      })
+    ]
+  }
 ]
