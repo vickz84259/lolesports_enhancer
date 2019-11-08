@@ -24,6 +24,14 @@ export async function add(db, value, key) {
   await transaction.done;
 }
 
+export async function get(db, key) {
+  let transaction = getTransaction(db);
+  let result = await transaction.store.get(key);
+  await transaction.done;
+
+  return result;
+}
+
 export async function getAllKeys(db = null) {
   if (!db) {
     db = await getDB();

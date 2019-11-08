@@ -33,7 +33,14 @@ export default [{
     output: {
       file: `${jsFirefoxDir}/content_scripts/vod.js`,
       format: 'iife'
-    }
+    },
+    plugins: [
+      resolve({
+        customResolveOptions: {
+          moduleDirectory: 'node_modules'
+        }
+      })
+    ]
   },
   {
     input: 'src/js/internal/settings.js',
