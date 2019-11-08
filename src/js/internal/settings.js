@@ -47,15 +47,16 @@ for (let announcerId of IDS.slice(0, 5)) {
 
 function save(event) {
   let announcerToggle = document.getElementById('toggle');
-  utils.setToStorage(keys.ANNOUNCER, announcerToggle.checked);
-
   if (announcerToggle.checked) {
+    // Save the other keys first to ensure they are available for the background script
     let checkedRadio = document.querySelector('input[name="announcer"]:checked');
     utils.setToStorage(keys.ANNOUNCER_TYPE, checkedRadio.value);
 
     let language = document.getElementById('language').value;
     utils.setToStorage(keys.ANNOUNCER_LANG, language);
   }
+
+  utils.setToStorage(keys.ANNOUNCER, announcerToggle.checked);
 
   // Prevent the page from refreshing.
   event.preventDefault();
