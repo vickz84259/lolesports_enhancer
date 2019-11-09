@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <meta charset="utf-8" />
+
+    <link rel='stylesheet' href='../css/settings.css' />
+  </head>
+
+  <body>
+    <form>
+      <div>
+        Voice Announcer:
+        <input type="checkbox" id="toggle" class="checkbox" />
+        <label for="toggle" class="switch"></label>
+      </div>
+      <div class="announcer_images">
+        <div class="announcer_image">
+          <label for='Announcer_Global_Ahri'><img src='../img/Announcer_Global_Ahri.jpg' alt='Star Guardian Announcer' /></label>
+          <label for='Announcer_Global_Ahri'>Star Guardian</label>
+          <input id="Announcer_Global_Ahri" type="radio" name="announcer" value='Announcer_Global_Ahri' disabled>
+        </div>
+        <div class="announcer_image">
+          <label for='Announcer_Global_Female1'><img src='../img/Announcer_Global_Female1.jpg' alt='Classic Announcer' /></label>
+          <label for='Announcer_Global_Female1'>Classic</label>
+          <input id="Announcer_Global_Female1" type="radio" name="announcer" value='Announcer_Global_Female1' checked disabled>
+        </div>
+        <div class="announcer_image">
+          <label for='Announcer_Global_Female1project'><img src='../img/Announcer_Global_Female1project.jpg' alt='Project Announcer' /></label>
+          <label for='Announcer_Global_Female1project'>Project</label>
+          <input id="Announcer_Global_Female1project" type="radio" name="announcer" value='Announcer_Global_Female1project' disabled>
+        </div>
+        <div class="announcer_image">
+          <label for='Announcer_Global_Male'><img src='../img/Announcer_Global_Male.jpg' alt='BilgeWater Announcer' /></label>
+          <label for='Announcer_Global_Male'>BilgeWater</label>
+          <input id="Announcer_Global_Male" type="radio" name="announcer" value='Announcer_Global_Male' disabled>
+        </div>
+        <div class="announcer_image">
+          <label for='Announcer_Global_Thresh'><img src='../img/Announcer_Global_Thresh.jpg' alt='Dark Star Announcer' /></label>
+          <label for='Announcer_Global_Thresh'>Dark Star</label>
+          <input id="Announcer_Global_Thresh" type="radio" name="announcer" value='Announcer_Global_Thresh' disabled>
+        </div>
+      </div>
+      <div class="language_option">
+        Language:
+        <select name='language' id='language' disabled>
+          <option value="en_GB">English</option>
+          <option value="ko_KR">Korean</option>
+          <option value="ja_JP">Japanese</option>
+          <option value="zh_CN">Chinese</option>
+          <option value="pt_BR">Portuguese</option>
+          <option value="de_DE">German</option>
+          <option value="es_MX">Spanish (LAN/LAS)</option>
+          <option value="es_ES">Spanish (Spain)</option>
+          <option value="tr_TR">Turkish</option>
+          <option value="fr_FR">French</option>
+          <option value="it_IT">Italian</option>
+          <option value="hu_HU">Hungarian</option>
+          <option value="pl_PL">Polish</option>
+          <option value="ru_RU">Russian</option>
+          <option value="ro_RO">Romanian</option>
+          <option value="cs_CZ">Czech</option>
+          <option value="el_GR">Greek</option>
+        </select>
+      </div>
+      <div class="button">
+        <button type='submit'>Save</button>
+      </div>
+    </form>
+  </body>
+
+  <script src='../js/internal/settings.js'></script>
+
+</html>

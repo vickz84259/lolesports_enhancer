@@ -2,14 +2,13 @@ import * as mutation from '../mutation.js';
 import * as layout from './layout_utils.js';
 import { getElementBySelector, getElementById } from '../DOM_utils.js';
 import { getFromStorage, setToStorage } from '../utils.js';
+import { MAX_VIDEO_SIZE } from '../keys.js';
 
 export { init };
 
 
 // The values stored will be of boolean type
 const LISTENERS_STATE = new Map();
-
-const MAX_VIDEO_SIZE_KEY = 'max_video_size';
 
 function addListener(eventTarget, layoutType) {
   // This works even if the value is undefined
@@ -31,7 +30,7 @@ async function getVideoPlayerWidth() {
 }
 
 async function getMaxVideoWidth() {
-  return (await getFromStorage(MAX_VIDEO_SIZE_KEY));
+  return (await getFromStorage(MAX_VIDEO_SIZE));
 }
 
 async function moveSideBar(newLayout) {
@@ -123,7 +122,7 @@ async function setExtraOption() {
   newOption.appendChild(label);
   layout.getOptionsList().appendChild(newOption);
 
-  let url = browser.runtime.getURL('src/img/right_sidebar.svg');
+  let url = browser.runtime.getURL('img/right_sidebar.svg');
   let sidebarSVG = await (await fetch(url)).text();
 
   newOption.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sidebarSVG));
@@ -134,7 +133,7 @@ async function setUpLayoutObserver() {
   // This observer checks if the user has opened the options to switch the stats
   // layout which triggers a mutation.
   let observer = new MutationObserver(async (mutationRecords) => {
-    for (let element of mutation.recordsIterator(mutationRecords)) {
+    for (let element of mutation.addedRecordsIterator(mutationRecords)) {
       if (element.className === 'WatchOptionsLayout') {
         await setExtraOption();
 
@@ -171,7 +170,7 @@ async function setUpLayoutObserver() {
 }
 
 async function init(tabState) {
-  let result = await getFromStorage(MAX_VIDEO_SIZE_KEY);
+  let result = await getFromStorage(MAX_VIDEO_SIZE);
   if (result === 'None') {
     // Setup the max video player size
     let currentLayout = await layout.getCurrent();
@@ -179,7 +178,7 @@ async function init(tabState) {
 
     let value = (notTheatre) ? (await getSideBarWidth()) : 0;
     value += (await getVideoPlayerWidth());
-    setToStorage(MAX_VIDEO_SIZE_KEY, value);
+    setToStorage(MAX_VIDEO_SIZE, value);
   }
 
   let observer = await setUpLayoutObserver();
