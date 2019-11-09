@@ -10,7 +10,6 @@ export { init, disconnect };
 class StatsInfo {
 
   constructor() {
-    this.allyTeam = null;
     this.previousTime = 0;
 
     this.announcerState = false;
@@ -19,12 +18,7 @@ class StatsInfo {
 
     this.audioFiles = new Map();
 
-    this.blueDead = 0;
-    this.redDead = 0;
-    this.totalKills = 0;
-
-    this.blueAce = false;
-    this.redAce = false;
+    this.reset();
   }
 
   logTime(currentTime) {
@@ -90,6 +84,29 @@ class StatsInfo {
     } else if (this.redDead === 5 && !this.redAce) {
       this.redAce = true;
       this.playAudio('ace');
+    }
+  }
+
+  async reset() {
+    this.blueDead = 0;
+    this.redDead = 0;
+    this.totalKills = 0;
+
+    this.blueAce = false;
+    this.redAce = false;
+
+    // setting allyTeam
+    let allyTeams = await getFromStorage(ALLY_TEAMS);
+    if (allyTeams !== 'None') {
+      let teams = await getTeams();
+      for (let team of teams) {
+        if (allyTeams.includes(team)) {
+          this.allyTeam = team;
+          break;
+        }
+      }
+    } else {
+      setToStorage(ALLY_TEAMS, []);
     }
   }
 }
@@ -262,10 +279,14 @@ function getDeathObserver(playerElement) {
 
 async function setUpStatsObserver(tabState) {
   // This observer checks if the team stats div has been added
-  let observer = new MutationObserver(async (mutationRecords, currentObserver) => {
-    for (let element of mutation.recordsIterator(mutationRecords)) {
-      if (element.className === 'StatsTeams') {
-        currentObserver.disconnect();
+  let observers = [];
+  let hasAddedObservers = false;
+
+  let observer = new MutationObserver(async (mutationRecords) => {
+    for (let element of mutation.targetElementsIterator(mutationRecords)) {
+      if (element.childElementCount === 3) {
+        if (hasAddedObservers) break;
+        hasAddedObservers = true;
 
         let teamsPlayers = await getElementBySelector('.StatsTeamsPlayers');
         for (let statsTeam of teamsPlayers.children) {
@@ -274,12 +295,25 @@ async function setUpStatsObserver(tabState) {
           if (className === 'blue-team' || className === 'red-team') {
 
             for (let player of statsTeam.children) {
-              tabState.addObserver(getKDAObserver(player));
-              tabState.addObserver(getDeathObserver(player));
+              let kdaObserver = getKDAObserver(player);
+              let deathObserver = getDeathObserver(player);
+
+              observers.push(kdaObserver, deathObserver);
+
+              tabState.addObserver(kdaObserver);
+              tabState.addObserver(deathObserver);
             }
           }
         }
-        break;
+      } else {
+        hasAddedObservers = false;
+
+        for (let observer of observers) {
+          observer.disconnect();
+        }
+        observers = [];
+
+        statsInfo.reset();
       }
     }
   });
@@ -291,19 +325,6 @@ async function setUpStatsObserver(tabState) {
 }
 
 async function init(tabState) {
-  let allyTeams = await getFromStorage(ALLY_TEAMS);
-  if (allyTeams !== 'None') {
-    let teams = await getTeams();
-    for (let team of teams) {
-      if (allyTeams.includes(team)) {
-        statsInfo.allyTeam = team;
-        break;
-      }
-    }
-  } else {
-    setToStorage(ALLY_TEAMS, []);
-  }
-
   let teamsElement = await getElementBySelector('.EventMatchScore .match .teams');
   for (let element of teamsElement.children) {
     if (element.className === 'team') {

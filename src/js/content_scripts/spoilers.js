@@ -69,7 +69,7 @@ function initBaseObserver(tabState) {
   // The initial observer looks for changes within the body tag and its
   // descendants. This is only reasonable when first visiting the page.
   let observer = new MutationObserver((mutationRecords, currentObserver) => {
-    for (let node of mutation.recordsIterator(mutationRecords)) {
+    for (let node of mutation.addedRecordsIterator(mutationRecords)) {
       if (node.classList.contains('Event')) {
         processEventNode(node);
 

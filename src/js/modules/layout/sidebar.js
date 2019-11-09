@@ -133,7 +133,7 @@ async function setUpLayoutObserver() {
   // This observer checks if the user has opened the options to switch the stats
   // layout which triggers a mutation.
   let observer = new MutationObserver(async (mutationRecords) => {
-    for (let element of mutation.recordsIterator(mutationRecords)) {
+    for (let element of mutation.addedRecordsIterator(mutationRecords)) {
       if (element.className === 'WatchOptionsLayout') {
         await setExtraOption();
 

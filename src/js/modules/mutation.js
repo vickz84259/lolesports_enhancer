@@ -7,8 +7,17 @@ export function* filteredNodes(nodes) {
   }
 }
 
-export function* recordsIterator(mutationRecords) {
+export function* addedRecordsIterator(mutationRecords) {
   for (let mutationRecord of mutationRecords) {
     yield* filteredNodes(mutationRecord.addedNodes);
+  }
+}
+
+export function* targetElementsIterator(mutationRecords) {
+  for (let mutationRecord of mutationRecords) {
+    let target = mutationRecord.target;
+    if (target.nodeType === 1) {
+      yield target;
+    }
   }
 }
