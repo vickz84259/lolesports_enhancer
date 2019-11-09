@@ -1,0 +1,77 @@
+{
+  "languages": [
+    "en_GB",
+    "ko_KR",
+    "ja_JP",
+    "zh_CN",
+    "pt_BR",
+    "de_DE",
+    "es_MX",
+    "es_ES",
+    "tr_TR",
+    "fr_FR",
+    "it_IT",
+    "hu_HU",
+    "pl_PL",
+    "ru_RU",
+    "ro_RO",
+    "cs_CZ",
+    "el_GR"
+  ],
+  "categories": {
+    "enemy_ace": [4, 5, 6],
+    "ace": [1, 2, 3, 7, 8],
+    "ally_ace": [9, 10, 11, 12],
+
+    "enemy_first_blood": [152, 153, 154],
+    "first_blood": [148, 149, 150, 151],
+    "ally_first_blood": [152, 153, 154, 155],
+
+    "ally": [29, 30, 31, 32, 33, 34],
+    "enemy": [35, 36, 37, 38, 39, 40, 41],
+
+    "enemy_double": [13, 14, 15, 16, 17],
+    "double": [18, 19, 20, 23, 24],
+    "ally_double": [25, 26, 27, 28, 24],
+
+    "enemy_triple": [98, 99, 100, 101],
+    "triple": [102, 103, 104, 105],
+    "ally_triple": [106, 107, 108, 109, 110, 111, 112, 113, 114],
+
+    "enemy_quadra": [83, 84, 85, 86],
+    "quadra": [87, 88, 89],
+    "ally_quadra": [90, 91, 93, 94, 95, 96, 97],
+
+    "enemy_penta": [66, 67, 68, 69, 70],
+    "penta": [71, 72, 73],
+    "ally_penta": [74, 75, 76, 77, 78, 79, 80, 81, 82],
+
+    "enemy_spree": [171, 172, 173, 174],
+    "spree": [169, 170],
+    "ally_spree": [175, 176, 177, 170],
+
+    "enemy_rampage": [181, 182, 183, 184],
+    "rampage": [178, 179, 180],
+    "ally_rampage": [185, 186, 187],
+
+    "enemy_unstoppable": [190, 191],
+    "unstoppable": [188, 189],
+    "ally_unstoppable": [192, 188],
+
+    "enemy_dominating": [195, 196],
+    "dominating": [193, 194],
+    "ally_dominating": [198, 199, 197],
+
+    "enemy_godlike": [202, 203, 201],
+    "godlike": [200, 201],
+    "ally_godlike": [204, 205, 206, 200],
+
+    "enemy_legendary": [115, 116, 208, 209],
+    "legendary": [117, 118, 119, 207],
+    "ally_legendary": [120, 122, 123, 124, 210, 211, 212],
+
+    "enemy_shutdown": [165, 166, 167, 168],
+    "shutdown": [165, 166, 167, 168],
+    "ally_shutdown": [165, 166, 167, 168]
+  }
+}
