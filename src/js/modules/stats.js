@@ -353,11 +353,11 @@ async function init(tabState) {
 
     statsInfo.scenarios = await announcer.getScenarios();
     statsInfo.loadAudioFiles();
+
+    setUpStatsObserver(tabState);
+
+    window.addEventListener('message', videoInfoHandler);
   }
-
-  setUpStatsObserver(tabState);
-
-  window.addEventListener('message', videoInfoHandler);
 }
 
 function disconnect() {
