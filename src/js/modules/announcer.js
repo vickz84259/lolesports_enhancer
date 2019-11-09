@@ -1,6 +1,6 @@
 import * as storage from './storage.js';
 import * as keys from './keys.js';
-import { getFromStorage, createNotification } from './utils.js';
+import { getFromStorage, createNotification, setToStorage } from './utils.js';
 
 const BASEURL = 'https://d3t82zuq6uoshl.cloudfront.net/';
 
