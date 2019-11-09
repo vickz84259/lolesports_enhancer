@@ -11,8 +11,10 @@ function main() {
     if (keys.ANNOUNCER in changes && changes[keys.ANNOUNCER].newValue) {
       announcer.downloadMissingFiles(true);
     } else if (keys.ALLY_TEAMS in changes) {
-      let team = changes[keys.ALLY_TEAMS].newValue[0];
-      createNotification(`${team} choosen as ally team`);
+      if (changes[keys.ALLY_TEAMS].newValue.length > 1) {
+        let team = changes[keys.ALLY_TEAMS].newValue[0];
+        createNotification(`${team} choosen as ally team`);
+      }
     }
   });
 }
