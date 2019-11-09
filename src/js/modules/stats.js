@@ -14,6 +14,7 @@ class StatsInfo {
     this.previousTime = 0;
 
     this.announcerState = false;
+    this.isYouTube = false;
     this.timeLog = [];
 
     this.audioFiles = new Map();
@@ -37,12 +38,15 @@ class StatsInfo {
   }
 
   canAnnounce() {
-    let lastFour = this.timeLog.slice(-4);
-    let diffOne = lastFour[3] - lastFour[2];
-    let diffTwo = lastFour[2] - lastFour[1];
-    let diffThree = lastFour[1] - lastFour[0];
+    if (this.isYouTube) {
+      let lastFour = this.timeLog.slice(-4);
+      let diffOne = lastFour[3] - lastFour[2];
+      let diffTwo = lastFour[2] - lastFour[1];
+      let diffThree = lastFour[1] - lastFour[0];
 
-    return (diffOne + diffTwo + diffThree) > 7.85 ? false : true;
+      return (diffOne + diffTwo + diffThree) > 7.85 ? false : true;
+    }
+    return true;
   }
 
   async loadAudioFiles() {
@@ -95,6 +99,7 @@ const statsInfo = new StatsInfo();
 function videoInfoHandler(event) {
   let eventData = JSON.parse(event.data);
   if (eventData.event === 'infoDelivery' && 'currentTime' in eventData.info) {
+    if (!statsInfo.isYouTube) statsInfo.isYouTube = true;
     statsInfo.logTime(eventData.info.currentTime);
   }
 }
