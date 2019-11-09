@@ -12,7 +12,8 @@
     "js": [
       "js/external/purify.min.js",
       "js/content_scripts/spoilers.js",
-      "js/content_scripts/vod.js"
+      "js/content_scripts/vod.js",
+      "js/content_scripts/live.js"
     ],
     "css": ["css/vod.css"]
   }],

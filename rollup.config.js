@@ -62,5 +62,19 @@ export default [{
         }
       })
     ]
+  },
+  {
+    input: 'src/js/content_scripts/live.js',
+    output: {
+      file: `${jsFirefoxDir}/content_scripts/live.js`,
+      format: 'iife'
+    },
+    plugins: [
+      resolve({
+        customResolveOptions: {
+          moduleDirectory: 'node_modules'
+        }
+      })
+    ]
   }
 ]
