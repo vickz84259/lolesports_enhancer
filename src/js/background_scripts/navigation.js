@@ -1,14 +1,29 @@
 const PORTS = new Map();
 
+// Keeps track of the unique ids representing ports for each content script in
+// a particular tab
+const IDS_MAP = new Map();
+
 function main() {
   browser.runtime.onConnect.addListener(port => {
     tabId = port.sender.tab.id;
-    PORTS.set(tabId, port);
+
+    let unique_id = `${tabId}_${port.name}`;
+    let value = IDS_MAP.has(tabId) ? IDS_MAP.get(tabId) : [];
+    value.push(unique_id);
+
+    IDS_MAP.set(tabId, value);
+    PORTS.set(unique_id, port);
   });
 
   browser.tabs.onRemoved.addListener(tabId => {
-    PORTS.delete(tabId);
-    browser.storage.local.remove(tabId.toString());
+    if (IDS_MAP.has(tabId)) {
+      let ids = IDS_MAP.get(tabId);
+      for (let id of ids) {
+        PORTS.delete(id);
+      }
+      IDS_MAP.delete(tabId);
+    }
   });
 
   /* beautify preserve:start */
@@ -31,16 +46,11 @@ function main() {
 }
 
 function navigationListener(details) {
-  let port = PORTS.get(details.tabId);
-
-  let message = {
-    // Since the tabId is already being used to track the different connection
-    // ports, sending it to content scripts to use in storage keys helps when
-    // it comes to cleanup.
-    tabId: details.tabId,
-    url: details.url
-  };
-  port.postMessage(message);
+  let ids = IDS_MAP.get(details.tabId);
+  for (let id of ids) {
+    let port = PORTS.get(id);
+    port.postMessage({ url: details.url });
+  }
 }
 
 main();

@@ -1,0 +1,58 @@
+{
+  "manifest_version": 2,
+  "name": "LolEsports Enhancer",
+
+  "version": "0.1",
+  "version_name": "1.0.0-alpha",
+
+  "description": "Enhances the user experience of using the LolEsports website",
+
+  "content_scripts": [{
+    "matches": ["https://watch.lolesports.com/*", "https://*.lolesports.com/*"],
+    "js": [
+      "js/external/purify.min.js",
+      "js/content_scripts/spoilers.js",
+      "js/content_scripts/vod.js",
+      "js/content_scripts/live.js"
+    ],
+    "css": ["css/vod.css"]
+  }],
+
+  "background": {
+    "scripts": [
+      "js/background_scripts/navigation.js",
+      "js/background_scripts/settings.js"
+    ]
+  },
+
+  "web_accessible_resources": [
+    "img/right_sidebar.svg",
+    "json/*"
+  ],
+
+  "permissions": [
+    "webNavigation",
+    "storage",
+    "notifications",
+    "unlimitedStorage",
+    "https://d3t82zuq6uoshl.cloudfront.net/*"
+  ],
+
+  "icons": {
+    "48": "img/logo_48.png",
+    "96": "img/logo_96.png"
+  },
+
+  "browser_action": {
+    "default_icon": {
+      "16": "img/logo_dark_16.png",
+      "32": "img/logo_dark_32.png"
+    },
+
+    "default_title": "LoL Esports Enhancer"
+  },
+
+  "options_ui": {
+    "page": "html/settings.html"
+  }
+}
