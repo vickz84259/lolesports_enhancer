@@ -1,6 +1,6 @@
 import * as mutation from './mutation.js';
 import * as announcer from './announcer.js';
-import { getFromStorage } from './utils.js';
+import { getFromStorage, setToStorage } from './utils.js';
 import { getElementBySelector } from './DOM_utils';
 import { ALLY_TEAMS, ANNOUNCER } from './keys.js';
 
@@ -117,6 +117,7 @@ function getKDAObserver(playerElement) {
   let team = (playerElement.parentElement.className === 'blue-team') ? 'blue' : 'red';
   let enemyTeam = (team === 'blue') ? 'red' : 'blue';
 
+  let playerName = playerElement.firstElementChild.textContent;
   let lastKill = 0;
 
   let multiKill = 0;
@@ -128,6 +129,9 @@ function getKDAObserver(playerElement) {
       consecutiveKills = 0;
     } else {
       if (statsInfo.canAnnounce()) {
+        let condition = (statsInfo.allyTeam && playerName.includes(statsInfo.allyTeam));
+        let isAlly = (condition) ? true : false;
+
         let currentTime = Date.now();
         let timeDiff = (currentTime - lastKill) / 1000;
         lastKill = currentTime;
@@ -174,6 +178,7 @@ function getKDAObserver(playerElement) {
                   } else {
                     scenarioType = 'ally';
                   }
+                  break;
               }
               break;
             case 2:
@@ -195,6 +200,21 @@ function getKDAObserver(playerElement) {
           if (statsInfo.totalKills === 0) {
             scenarioType = 'first_blood';
           }
+
+          if (statsInfo.allyTeam) {
+            if (isAlly) {
+              if (scenarioType === 'ally') {
+                scenarioType = 'enemy';
+              } else {
+                scenarioType = `ally_${scenarioType}`;
+              }
+            } else {
+              if (scenarioType !== 'ally') {
+                scenarioType = `enemy_${scenarioType}`;
+              }
+            }
+          }
+
           statsInfo.playAudio(scenarioType);
         }
         statsInfo.totalKills += kills;
@@ -271,9 +291,33 @@ async function init(tabState) {
     let teams = await getTeams();
     for (let team of teams) {
       if (allyTeams.includes(team)) {
-        allyTeam = team;
+        statsInfo.allyTeam = team;
         break;
       }
+    }
+  } else {
+    setToStorage(ALLY_TEAMS, []);
+  }
+
+  let teamsElement = await getElementBySelector('.EventMatchScore .match .teams');
+  for (let element of teamsElement.children) {
+    if (element.className === 'team') {
+      element.firstElementChild.addEventListener('click', async (event) => {
+        let team = event.target.textContent;
+        statsInfo.allyTeam = team;
+
+        let allyTeams = await getFromStorage(ALLY_TEAMS);
+        let index = allyTeams.indexOf(team);
+        if (index != -1) {
+          let temp = allyTeams[0];
+          allyTeams[0] = team;
+          allyTeams[index] = temp;
+        } else {
+          allyTeams.unshift(team);
+        }
+
+        setToStorage(ALLY_TEAMS, allyTeams);
+      });
     }
   }
 
