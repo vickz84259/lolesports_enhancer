@@ -1,5 +1,6 @@
 import copy from 'rollup-plugin-copy';
 import resolve from 'rollup-plugin-node-resolve';
+import cleanup from 'rollup-plugin-cleanup';
 
 let firefoxDir = 'builds/firefox';
 let jsFirefoxDir = `${firefoxDir}/js`;
@@ -25,7 +26,10 @@ export default [{
       format: 'iife'
     },
     plugins: [
-      my_copy()
+      my_copy(),
+      cleanup({
+        comments: 'none'
+      })
     ]
   },
   {
@@ -39,6 +43,9 @@ export default [{
         customResolveOptions: {
           moduleDirectory: 'node_modules'
         }
+      }),
+      cleanup({
+        comments: 'none'
       })
     ]
   },
@@ -47,7 +54,12 @@ export default [{
     output: {
       file: `${jsFirefoxDir}/internal/settings.js`,
       format: 'iife'
-    }
+    },
+    plugins: [
+      cleanup({
+        comments: 'none'
+      })
+    ]
   },
   {
     input: 'src/js/background_scripts/settings.js',
@@ -60,6 +72,9 @@ export default [{
         customResolveOptions: {
           moduleDirectory: 'node_modules'
         }
+      }),
+      cleanup({
+        comments: 'none'
       })
     ]
   },
@@ -74,6 +89,9 @@ export default [{
         customResolveOptions: {
           moduleDirectory: 'node_modules'
         }
+      }),
+      cleanup({
+        comments: 'none'
       })
     ]
   }

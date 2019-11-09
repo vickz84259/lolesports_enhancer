@@ -24,7 +24,7 @@ async function createNotification(message) {
   return (await browser.notifications.create({
     type: 'basic',
     iconUrl: browser.runtime.getURL('img/logo_48.png'),
-    title: 'LOL Esports Enhancer',
+    title: 'LoL Esports Enhancer',
     message
   }));
 }

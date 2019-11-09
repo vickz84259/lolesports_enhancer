@@ -22,8 +22,7 @@ function hideSpoiler(match) {
       score = result.querySelector('.versus');
     }
 
-    // TODO: Change this as it is not recommended
-    score.innerHTML = 'VS';
+    score.textContent = 'VS';
 
     let teams = link.getElementsByClassName('team');
     for (let team of teams) {

@@ -1,6 +1,6 @@
 import * as storage from './storage.js';
 import * as keys from './keys.js';
-import { getFromStorage, createNotification } from './utils.js';
+import { getFromStorage, createNotification, setToStorage } from './utils.js';
 
 const BASEURL = 'https://d3t82zuq6uoshl.cloudfront.net/';
 
@@ -56,15 +56,24 @@ async function downloadFiles(fileNamesIterator) {
 }
 
 export async function downloadMissingFiles(notification = false) {
+  let download_ongoing = await getFromStorage('download_ongoing');
+  if (download_ongoing === 'None' || !download_ongoing) {
+    setToStorage('download_ongoing', true);
+  } else {
+    return;
+  }
+
   let missingFiles = await getMissingFileNames();
 
   if (missingFiles.length > 1) {
-    if (notification) createNotification('Downloading audio files');
+    if (notification) await createNotification('Downloading audio files');
 
     await downloadFiles(missingFiles);
 
-    if (notification) createNotification('Audio files downloaded successfully');
+    if (notification) await createNotification('Audio files downloaded successfully');
   }
+
+  setToStorage('download_ongoing', false);
 }
 
 export async function getScenarios() {
