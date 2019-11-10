@@ -7,7 +7,7 @@ const IDS = [
   'Announcer_Global_Female1project',
   'Announcer_Global_Male',
   'Announcer_Global_Thresh',
-  'language'
+  'locale'
 ];
 
 function toggle(event) {
@@ -25,7 +25,7 @@ document.getElementById('toggle').addEventListener('click', toggle);
 
 for (let announcerId of IDS.slice(0, 5)) {
   document.getElementById(announcerId).addEventListener('click', () => {
-    let options = document.getElementById('language').children;
+    let options = document.getElementById('locale').children;
 
     for (let option of options) {
       if (option.value === 'zh_CN') {
@@ -41,7 +41,7 @@ for (let announcerId of IDS.slice(0, 5)) {
     let option = document.createElement('option');
     option.value = 'zh_CN';
     option.textContent = 'Chinese';
-    document.getElementById('language').appendChild(option);
+    document.getElementById('locale').appendChild(option);
   });
 }
 
@@ -52,8 +52,8 @@ function save(event) {
     let checkedRadio = document.querySelector('input[name="announcer"]:checked');
     utils.setToStorage(keys.ANNOUNCER_TYPE, checkedRadio.value);
 
-    let language = document.getElementById('language').value;
-    utils.setToStorage(keys.ANNOUNCER_LANG, language);
+    let locale = document.getElementById('locale').value;
+    utils.setToStorage(keys.ANNOUNCER_LANG, locale);
   }
 
   utils.setToStorage(keys.ANNOUNCER, announcerToggle.checked);
@@ -77,8 +77,8 @@ async function setValues() {
     let announcerType = await utils.getFromStorage(keys.ANNOUNCER_TYPE);
     document.getElementById(announcerType).checked = true;
 
-    let language = await utils.getFromStorage(keys.ANNOUNCER_LANG);
-    document.getElementById('language').value = language;
+    let locale = await utils.getFromStorage(keys.ANNOUNCER_LANG);
+    document.getElementById('locale').value = locale;
   }
 }
 
