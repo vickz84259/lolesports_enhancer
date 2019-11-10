@@ -9,7 +9,7 @@ function main() {
 
   browser.storage.onChanged.addListener(async (changes) => {
     if (keys.ANNOUNCER in changes && changes[keys.ANNOUNCER].newValue) {
-      announcer.downloadMissingFiles(true);
+      announcer.checkFiles();
     } else if (keys.ALLY_TEAMS in changes) {
       if (changes[keys.ALLY_TEAMS].newValue.length > 1) {
         let team = changes[keys.ALLY_TEAMS].newValue[0];

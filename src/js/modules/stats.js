@@ -349,14 +349,16 @@ async function init(tabState) {
 
   statsInfo.announcerState = await getFromStorage(ANNOUNCER);
   if (statsInfo.announcerState) {
-    await announcer.downloadMissingFiles();
-
-    statsInfo.scenarios = await announcer.getScenarios();
-    statsInfo.loadAudioFiles();
-
     setUpStatsObserver(tabState);
 
     window.addEventListener('message', videoInfoHandler);
+
+    // Having the check after the handler is set to prevent scenario where the
+    // download of missing files holds up setting up of handler.
+    await announcer.checkFiles();
+
+    statsInfo.scenarios = await announcer.getScenarios();
+    statsInfo.loadAudioFiles();
   }
 }
 
