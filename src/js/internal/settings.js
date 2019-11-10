@@ -10,6 +10,12 @@ const IDS = [
   'locale'
 ];
 
+const currentSettings = {
+  changed: false,
+  announcerType: '',
+  locale: '',
+}
+
 function toggle(event) {
   for (let id of IDS) {
     let element = document.getElementById(id);
@@ -45,18 +51,37 @@ for (let announcerId of IDS.slice(0, 5)) {
   });
 }
 
+
 function save(event) {
-  let announcerToggle = document.getElementById('toggle');
-  if (announcerToggle.checked) {
-    // Save the other keys first to ensure they are available for the background script
-    let checkedRadio = document.querySelector('input[name="announcer"]:checked');
-    utils.setToStorage(keys.ANNOUNCER_TYPE, checkedRadio.value);
+  let announcerToggle = document.getElementById('toggle').checked;
+  utils.setToStorage(keys.ANNOUNCER, announcerToggle);
+
+  if (announcerToggle) {
+    let announcerType = document.querySelector('input[name="announcer"]:checked').value;
+    if (announcerType !== currentSettings.announcerType) {
+      currentSettings.announcer = announcerType;
+      currentSettings.changed = true;
+
+      utils.setToStorage(keys.ANNOUNCER_TYPE, announcerType);
+    }
 
     let locale = document.getElementById('locale').value;
-    utils.setToStorage(keys.ANNOUNCER_LANG, locale);
-  }
+    if (locale !== currentSettings.locale) {
+      currentSettings.locale = locale;
+      currentSettings.changed = true;
 
-  utils.setToStorage(keys.ANNOUNCER, announcerToggle.checked);
+      utils.setToStorage(keys.ANNOUNCER_LANG, locale);
+    }
+
+    if (currentSettings.changed) {
+      currentSettings.changed = false; // Reset the flag.
+
+      browser.runtime.sendMessage({
+        destination: 'settings',
+        data: 'settings_updated'
+      });
+    }
+  }
 
   // Prevent the page from refreshing.
   event.preventDefault();
@@ -75,9 +100,11 @@ async function setValues() {
     document.getElementById('toggle').click();
 
     let announcerType = await utils.getFromStorage(keys.ANNOUNCER_TYPE);
+    currentSettings.announcerType = announcerType;
     document.getElementById(announcerType).checked = true;
 
     let locale = await utils.getFromStorage(keys.ANNOUNCER_LANG);
+    currentSettings.locale = locale;
     document.getElementById('locale').value = locale;
   }
 }
