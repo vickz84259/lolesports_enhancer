@@ -16,7 +16,9 @@ class StatsInfo {
     this.isYouTube = false;
     this.timeLog = [];
 
+    this.audioContext = new AudioContext();
     this.audioFiles = new Map();
+    this.audioBuffers = new Map();
 
     this.reset();
   }
@@ -44,21 +46,33 @@ class StatsInfo {
   }
 
   async loadAudioFiles() {
-    this.audioContext = new AudioContext();
     for await (let audioObj of announcer.getAudioFiles()) {
-      let audioBuffer = await this.audioContext.decodeAudioData(audioObj.data);
-      this.audioFiles.set(audioObj.fileName, audioBuffer);
+      this.audioFiles.set(audioObj.fileName, audioObj.data);
     }
   }
 
-  playAudio(scenarioType) {
+  async playAudio(scenarioType) {
     let source = this.audioContext.createBufferSource();
 
     let scenario = statsInfo.scenarios[scenarioType];
     let fileName = scenario[Math.floor(Math.random() * scenario.length)];
-    source.buffer = this.audioFiles.get(fileName);
+
+    let audioBuffer;
+    if (this.audioBuffers.has(fileName)) {
+      audioBuffer = this.audioBuffers.get(fileName);
+    } else {
+      let audioFile = this.audioFiles.get(fileName);
+      audioBuffer = await this.audioContext.decodeAudioData(audioFile);
+    }
+
+    source.buffer = audioBuffer;
     source.connect(this.audioContext.destination);
     source.start();
+
+    if (!this.audioBuffers.has(fileName)) {
+      this.audioFiles.delete(fileName);
+      this.audioBuffers.set(fileName, audioBuffer);
+    }
   }
 
   updateDeaths(team, dead) {
@@ -325,6 +339,20 @@ async function setUpStatsObserver(tabState) {
 }
 
 async function init(tabState) {
+  statsInfo.announcerState = await getFromStorage(ANNOUNCER);
+  if (statsInfo.announcerState) {
+    setUpStatsObserver(tabState);
+
+    window.addEventListener('message', videoInfoHandler);
+
+    // Having the check after the handler is set to prevent scenario where the
+    // download of missing files holds up setting up of handler.
+    await announcer.checkFiles();
+    statsInfo.loadAudioFiles();
+
+    statsInfo.scenarios = await announcer.getScenarios();
+  }
+
   let teamsElement = await getElementBySelector('.EventMatchScore .match .teams');
   for (let element of teamsElement.children) {
     if (element.className === 'team') {
@@ -345,20 +373,6 @@ async function init(tabState) {
         setToStorage(ALLY_TEAMS, allyTeams);
       });
     }
-  }
-
-  statsInfo.announcerState = await getFromStorage(ANNOUNCER);
-  if (statsInfo.announcerState) {
-    setUpStatsObserver(tabState);
-
-    window.addEventListener('message', videoInfoHandler);
-
-    // Having the check after the handler is set to prevent scenario where the
-    // download of missing files holds up setting up of handler.
-    await announcer.checkFiles();
-
-    statsInfo.scenarios = await announcer.getScenarios();
-    statsInfo.loadAudioFiles();
   }
 }
 
