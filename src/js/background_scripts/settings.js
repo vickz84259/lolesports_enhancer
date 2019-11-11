@@ -7,10 +7,14 @@ function main() {
     browser.runtime.openOptionsPage();
   });
 
+  browser.runtime.onMessage.addListener(async (message) => {
+    if (message.destination === 'settings' && message.data === 'settings_updated') {
+      announcer.checkFiles();
+    }
+  });
+
   browser.storage.onChanged.addListener(async (changes) => {
-    if (keys.ANNOUNCER in changes && changes[keys.ANNOUNCER].newValue) {
-      announcer.downloadMissingFiles(true);
-    } else if (keys.ALLY_TEAMS in changes) {
+    if (keys.ALLY_TEAMS in changes) {
       if (changes[keys.ALLY_TEAMS].newValue.length > 1) {
         let team = changes[keys.ALLY_TEAMS].newValue[0];
         createNotification(`${team} choosen as ally team`);

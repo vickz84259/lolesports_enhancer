@@ -6,6 +6,11 @@ All notable changes to this project will be documented in this file
 ### Added
 - This CHANGELOG file to keep track of changes over time.
 
+### Changed
+- Logic around settings to prevent a scenario where another download is triggered even though the
+    current settings haven't changed.
+- Improve the loading times and cache of audio files.
+
 
 ## [1.1.0] - 2019-11-10
 ### Added
