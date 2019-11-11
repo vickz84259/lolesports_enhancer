@@ -11,6 +11,9 @@ All notable changes to this project will be documented in this file
     current settings haven't changed.
 - Improve the loading times and cache of audio files.
 
+### Fixed
+- The announcer not sounding during live matches.
+
 
 ## [1.1.0] - 2019-11-10
 ### Added

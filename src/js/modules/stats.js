@@ -296,14 +296,13 @@ async function setUpStatsObserver(tabState) {
   let observers = [];
   let hasAddedObservers = false;
 
-  let observer = new MutationObserver(async (mutationRecords) => {
-    for (let element of mutation.targetElementsIterator(mutationRecords)) {
-      if (element.childElementCount === 3) {
+  let addedObserver = new MutationObserver((mutationRecords) => {
+    for (let element of mutation.addedRecordsIterator(mutationRecords)) {
+      if (element.className === 'StatsTeamsPlayers') {
         if (hasAddedObservers) break;
         hasAddedObservers = true;
 
-        let teamsPlayers = await getElementBySelector('.StatsTeamsPlayers');
-        for (let statsTeam of teamsPlayers.children) {
+        for (let statsTeam of element.children) {
 
           let className = statsTeam.className;
           if (className === 'blue-team' || className === 'red-team') {
@@ -319,7 +318,13 @@ async function setUpStatsObserver(tabState) {
             }
           }
         }
-      } else {
+      }
+    }
+  });
+
+  let removedObserver = new MutationObserver((mutationRecords) => {
+    for (let element of mutation.removedRecordsIterator(mutationRecords)) {
+      if (element.className === 'StatsTeamsPlayers') {
         hasAddedObservers = false;
 
         for (let observer of observers) {
@@ -332,10 +337,12 @@ async function setUpStatsObserver(tabState) {
     }
   });
 
-  let targetElement = getElementBySelector('.overview-pane');
-  observer.observe((await targetElement), { childList: true });
+  let config = { childList: true, subtree: true };
+  addedObserver.observe(document.body, config);
+  removedObserver.observe(document.body, config);
 
-  tabState.addObserver(observer);
+  tabState.addObserver(addedObserver);
+  tabState.addObserver(removedObserver);
 }
 
 async function init(tabState) {

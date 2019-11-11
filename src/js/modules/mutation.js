@@ -13,11 +13,8 @@ export function* addedRecordsIterator(mutationRecords) {
   }
 }
 
-export function* targetElementsIterator(mutationRecords) {
+export function* removedRecordsIterator(mutationRecords) {
   for (let mutationRecord of mutationRecords) {
-    let target = mutationRecord.target;
-    if (target.nodeType === 1) {
-      yield target;
-    }
+    yield* filteredNodes(mutationRecord.removedNodes);
   }
 }
