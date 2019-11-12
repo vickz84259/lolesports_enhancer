@@ -83,6 +83,11 @@ function save(event) {
     }
   }
 
+  browser.runtime.sendMessage({
+    destination: 'notification',
+    data: 'Your settings have been saved'
+  });
+
   // Prevent the page from refreshing.
   event.preventDefault();
 }
