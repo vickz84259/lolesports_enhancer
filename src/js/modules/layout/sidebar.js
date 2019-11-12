@@ -3,6 +3,7 @@ import * as layout from './layout_utils.js';
 import { getElementBySelector, getElementById } from '../DOM_utils.js';
 import { getFromStorage, setToStorage } from '../utils.js';
 import { MAX_VIDEO_SIZE } from '../keys.js';
+import { getSVG } from '../resources.js';
 
 export { init };
 
@@ -122,10 +123,9 @@ async function setExtraOption() {
   newOption.appendChild(label);
   layout.getOptionsList().appendChild(newOption);
 
-  let url = browser.runtime.getURL('img/right_sidebar.svg');
-  let sidebarSVG = await (await fetch(url)).text();
-
+  let sidebarSVG = await getSVG('img/right_sidebar.svg');
   newOption.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sidebarSVG));
+
   addListener(newOption, layout.Layouts.SIDEBAR_RIGHT);
 }
 
