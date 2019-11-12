@@ -5,6 +5,7 @@ All notable changes to this project will be documented in this file
 ## [Unreleased]
 ### Added
 - This CHANGELOG file to keep track of changes over time.
+- Background script to handle creation of notifications.
 
 ### Changed
 - Logic around settings to prevent a scenario where another download is triggered even though the

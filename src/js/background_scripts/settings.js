@@ -1,6 +1,5 @@
 import * as keys from '../modules/keys.js';
 import * as announcer from '../modules/announcer.js';
-import { createNotification } from '../modules/utils.js';
 
 function main() {
   browser.browserAction.onClicked.addListener(() => {
