@@ -132,30 +132,28 @@ async function setExtraOption() {
 async function setUpLayoutObserver() {
   // This observer checks if the user has opened the options to switch the stats
   // layout which triggers a mutation.
-  let observer = new MutationObserver(async (mutationRecords) => {
-    for (let element of mutation.addedRecordsIterator(mutationRecords)) {
-      if (element.className === 'WatchOptionsLayout') {
-        await setExtraOption();
+  let observer = new MutationObserver(async (records) => {
+    for (let _ of mutation.addedRecordsIterator(records, 'WatchOptionsLayout')) {
+      await setExtraOption();
 
-        // Add eventListener to theatre option
-        for (let option of layout.getOptions()) {
-          if (layout.isTheatre(option.firstChild.textContent)) {
-            addListener(option, layout.Layouts.THEATRE);
-          }
+      // Add eventListener to theatre option
+      for (let option of layout.getOptions()) {
+        if (layout.isTheatre(option.firstChild.textContent)) {
+          addListener(option, layout.Layouts.THEATRE);
         }
+      }
 
-        // Set UI for currently selected layout
-        // This is needed when the right sidebar is the selected option
-        let currentLayout = await layout.getCurrent();
-        if (layout.isRightSB(currentLayout)) {
-          // remove the previously selected option
-          layout.getSelectedOption().classList.remove('selected');
+      // Set UI for currently selected layout
+      // This is needed when the right sidebar is the selected option
+      let currentLayout = await layout.getCurrent();
+      if (layout.isRightSB(currentLayout)) {
+        // remove the previously selected option
+        layout.getSelectedOption().classList.remove('selected');
 
-          // Set the Right sidebar option as the selected one.
-          for (let option of layout.getOptions()) {
-            if (option.firstChild.textContent === currentLayout) {
-              option.classList.add('selected');
-            }
+        // Set the Right sidebar option as the selected one.
+        for (let option of layout.getOptions()) {
+          if (option.firstChild.textContent === currentLayout) {
+            option.classList.add('selected');
           }
         }
       }
