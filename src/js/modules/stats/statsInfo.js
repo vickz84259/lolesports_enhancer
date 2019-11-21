@@ -1,5 +1,5 @@
 import * as announcer from '../announcer.js';
-import { getFromStorage } from '../utils.js';
+import { getFromStorage, setToStorage } from '../utils.js';
 import { getElementBySelector } from '../DOM_utils';
 import { ALLY_TEAMS } from '../keys.js';
 
@@ -15,6 +15,27 @@ class BaseStats {
     this.loadScenarios();
 
     this.reset();
+  }
+
+  get allyTeam() {
+    return this._allyTeam;
+  }
+
+  set allyTeam(team) {
+    this._allyTeam = team;
+
+    if (team) {
+      let index = this.allyTeams.indexOf(team);
+      if (index != -1) {
+        let temp = this.allyTeams[0];
+        this.allyTeams[0] = team;
+        this.allyTeams[index] = temp;
+      } else {
+        this.allyTeams.unshift(team);
+      }
+
+      setToStorage(ALLY_TEAMS, this.allyTeams);
+    }
   }
 
   async loadAudioFiles() {
@@ -56,18 +77,19 @@ class BaseStats {
 
   async reset() {
     // setting allyTeam
-    this.allyTeam = null;
+    this._allyTeam = null;
 
-    let allyTeams = await getFromStorage(ALLY_TEAMS);
-    if (allyTeams !== 'None') {
+    this.allyTeams = await getFromStorage(ALLY_TEAMS);
+    if (this.allyTeams !== 'None') {
       for await (let teamName of getTeamNames()) {
-        if (allyTeams.includes(teamName)) {
-          this.allyTeam = teamName;
+        if (this.allyTeams.includes(teamName)) {
+          this._allyTeam = teamName;
           break;
         }
       }
     } else {
-      setToStorage(ALLY_TEAMS, []);
+      this.allyTeams = [];
+      setToStorage(ALLY_TEAMS, this.allyTeams);
     }
   }
 }
@@ -146,7 +168,7 @@ export class StatsInfo extends BaseStats {
   }
 }
 
-async function* getTeamNames() {
+export async function* getTeamNames() {
   // Get the teams currently playing
   let teams = await getElementBySelector('.match .teams');
   for (let element of teams.children) {
