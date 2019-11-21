@@ -1,7 +1,7 @@
 import * as mutation from './mutation.js';
-import { getFromStorage, setToStorage } from './utils.js';
-import { getElementBySelector } from './DOM_utils';
-import { ALLY_TEAMS, ANNOUNCER } from './keys.js';
+import * as options from './stats/options.js';
+import { getFromStorage } from './utils.js';
+import { ANNOUNCER } from './keys.js';
 import { StatsInfo } from './stats/statsInfo.js';
 
 export { init, disconnect };
@@ -154,9 +154,7 @@ function getDeathObserver(playerElement) {
     }
   });
 
-  let config = { attributeFilter: ['class'], attributeOldValue: true };
-  observer.observe(playerElement, config);
-
+  observer.observe(playerElement, { attributeFilter: ['class'] });
   return observer;
 }
 
@@ -166,44 +164,40 @@ async function setUpStatsObserver(tabState) {
   let observers = [];
   let hasAddedObservers = false;
 
-  let addedObserver = new MutationObserver((mutationRecords) => {
-    for (let element of mutation.addedRecordsIterator(mutationRecords)) {
-      if (element.className === 'StatsTeamsPlayers') {
-        if (hasAddedObservers) break;
-        hasAddedObservers = true;
+  let addedObserver = new MutationObserver((records) => {
+    for (let element of mutation.addedRecordsIterator(records, 'StatsTeamsPlayers')) {
+      if (hasAddedObservers) break;
+      hasAddedObservers = true;
 
-        for (let statsTeam of element.children) {
+      for (let statsTeam of element.children) {
 
-          let className = statsTeam.className;
-          if (className === 'blue-team' || className === 'red-team') {
+        let className = statsTeam.className;
+        if (className === 'blue-team' || className === 'red-team') {
 
-            for (let player of statsTeam.children) {
-              let kdaObserver = getKDAObserver(player);
-              let deathObserver = getDeathObserver(player);
+          for (let player of statsTeam.children) {
+            let kdaObserver = getKDAObserver(player);
+            let deathObserver = getDeathObserver(player);
 
-              observers.push(kdaObserver, deathObserver);
+            observers.push(kdaObserver, deathObserver);
 
-              tabState.addObserver(kdaObserver);
-              tabState.addObserver(deathObserver);
-            }
+            tabState.addObserver(kdaObserver);
+            tabState.addObserver(deathObserver);
           }
         }
       }
     }
   });
 
-  let removedObserver = new MutationObserver((mutationRecords) => {
-    for (let element of mutation.removedRecordsIterator(mutationRecords)) {
-      if (element.className === 'StatsTeamsPlayers') {
-        hasAddedObservers = false;
+  let removedObserver = new MutationObserver((records) => {
+    for (let _ of mutation.removedRecordsIterator(records, 'StatsTeamsPlayers')) {
+      hasAddedObservers = false;
 
-        for (let observer of observers) {
-          observer.disconnect();
-        }
-        observers = [];
-
-        statsInfo.reset();
+      for (let observer of observers) {
+        observer.disconnect();
       }
+      observers = [];
+
+      statsInfo.reset();
     }
   });
 
@@ -221,29 +215,9 @@ async function init(tabState) {
     statsInfo = new StatsInfo();
     setUpStatsObserver(tabState);
 
+    options.init(tabState, statsInfo);
+
     window.addEventListener('message', videoInfoHandler);
-  }
-
-  let teamsElement = await getElementBySelector('.EventMatchScore .match .teams');
-  for (let element of teamsElement.children) {
-    if (element.className === 'team') {
-      element.firstElementChild.addEventListener('click', async (event) => {
-        let team = event.target.textContent;
-        statsInfo.allyTeam = team;
-
-        let allyTeams = await getFromStorage(ALLY_TEAMS);
-        let index = allyTeams.indexOf(team);
-        if (index != -1) {
-          let temp = allyTeams[0];
-          allyTeams[0] = team;
-          allyTeams[index] = temp;
-        } else {
-          allyTeams.unshift(team);
-        }
-
-        setToStorage(ALLY_TEAMS, allyTeams);
-      });
-    }
   }
 }
 

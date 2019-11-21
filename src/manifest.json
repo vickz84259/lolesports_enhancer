@@ -28,6 +28,7 @@
 
   "web_accessible_resources": [
     "img/right_sidebar.svg",
+    "img/right_caret.svg",
     "json/*"
   ],
 
