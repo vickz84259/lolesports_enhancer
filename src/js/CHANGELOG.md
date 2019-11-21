@@ -5,11 +5,16 @@ All notable changes to this project will be documented in this file
 ## [Unreleased]
 ### Added
 - This CHANGELOG file to keep track of changes over time.
+- Background script to handle creation of notifications.
 
 ### Changed
 - Logic around settings to prevent a scenario where another download is triggered even though the
     current settings haven't changed.
 - Improve the loading times and cache of audio files.
+- Selection of announcer ally team is now in the options menu below the video on the bottom right.
+
+### Fixed
+- The announcer not sounding during live matches.
 
 
 ## [1.1.0] - 2019-11-10

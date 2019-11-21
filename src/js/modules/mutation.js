@@ -1,23 +1,21 @@
-export function* filteredNodes(nodes) {
-  // Generator to filter and yield only nodes of type Element.
+export function* filteredNodes(nodes, className) {
+  // Generator to filter and yield only nodes of type Element and with the
+  // specified className.
   for (let node of nodes) {
-    if (node.nodeType === 1) {
+    if (node.nodeType === 1 && node.classList.contains(className)) {
       yield node;
     }
   }
 }
 
-export function* addedRecordsIterator(mutationRecords) {
+export function* addedRecordsIterator(mutationRecords, className) {
   for (let mutationRecord of mutationRecords) {
-    yield* filteredNodes(mutationRecord.addedNodes);
+    yield* filteredNodes(mutationRecord.addedNodes, className);
   }
 }
 
-export function* targetElementsIterator(mutationRecords) {
+export function* removedRecordsIterator(mutationRecords, className) {
   for (let mutationRecord of mutationRecords) {
-    let target = mutationRecord.target;
-    if (target.nodeType === 1) {
-      yield target;
-    }
+    yield* filteredNodes(mutationRecord.removedNodes, className);
   }
 }

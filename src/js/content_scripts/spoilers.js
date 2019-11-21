@@ -57,10 +57,8 @@ function observeMatches() {
 }
 
 function processEventNode(node) {
-  for (let match of mutation.filteredNodes(node.childNodes)) {
-    if (match.classList.contains('EventMatch')) {
-      hideSpoiler(match);
-    }
+  for (let match of mutation.filteredNodes(node.childNodes, 'EventMatch')) {
+    hideSpoiler(match);
   }
 }
 
@@ -68,15 +66,13 @@ function initBaseObserver(tabState) {
   // The initial observer looks for changes within the body tag and its
   // descendants. This is only reasonable when first visiting the page.
   let observer = new MutationObserver((mutationRecords, currentObserver) => {
-    for (let node of mutation.addedRecordsIterator(mutationRecords)) {
-      if (node.classList.contains('Event')) {
-        processEventNode(node);
+    for (let node of mutation.addedRecordsIterator(mutationRecords, 'Event')) {
+      processEventNode(node);
 
-        // Disconnecting this observer and initialising the second one.
-        currentObserver.disconnect();
-        tabState.addObserver(observeMatches());
-        break;
-      }
+      // Disconnecting this observer and initialising the second one.
+      currentObserver.disconnect();
+      tabState.addObserver(observeMatches());
+      break;
     }
   });
 

@@ -1,22 +1,9 @@
 import * as storage from './storage.js';
 import * as keys from './keys.js';
 import { getFromStorage } from './utils.js';
+import { getJson } from './resources.js';
 
 const BASEURL = 'https://d3t82zuq6uoshl.cloudfront.net/';
-
-
-async function getJsonResource(path) {
-  /* Fetches json data from a web accessible resource
-
-  Args:
-    path: Relative path to the resource file
-
-  Returns:
-    An object representing the json data retrieved
-  */
-  let url = browser.runtime.getURL(path);
-  return (await (await fetch(url)).json());
-}
 
 
 function getPaddedFileName(fileNumber) {
@@ -34,7 +21,7 @@ function getPaddedFileName(fileNumber) {
 
 
 async function* getFileNames(announcerType, locale) {
-  let response = await getJsonResource(`json/${announcerType}.json`);
+  let response = await getJson(`json/${announcerType}.json`);
 
   let fileNumbers = Object.values(response.categories);
   let fileNoSet = new Set([].concat(...fileNumbers));
@@ -82,7 +69,7 @@ export async function checkFiles() {
 
 export async function getScenarios() {
   let settings = await getAnnouncerSettings();
-  let response = await getJsonResource(`json/${settings.announcerType}.json`);
+  let response = await getJson(`json/${settings.announcerType}.json`);
   let scenarios = response.categories;
 
   for (let key in scenarios) {

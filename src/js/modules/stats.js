@@ -1,131 +1,13 @@
 import * as mutation from './mutation.js';
-import * as announcer from './announcer.js';
-import { getFromStorage, setToStorage } from './utils.js';
-import { getElementBySelector } from './DOM_utils';
-import { ALLY_TEAMS, ANNOUNCER } from './keys.js';
+import * as options from './stats/options.js';
+import { getFromStorage } from './utils.js';
+import { ANNOUNCER } from './keys.js';
+import { StatsInfo } from './stats/statsInfo.js';
 
 export { init, disconnect };
 
 
-class StatsInfo {
-
-  constructor() {
-    this.previousTime = 0;
-
-    this.announcerState = false;
-    this.isYouTube = false;
-    this.timeLog = [];
-
-    this.audioContext = new AudioContext();
-    this.audioFiles = new Map();
-    this.audioBuffers = new Map();
-
-    this.reset();
-  }
-
-  logTime(currentTime) {
-    currentTime = Math.floor(currentTime * 10) / 10;
-    if ((currentTime - this.previousTime) >= 2.5) {
-      this.previousTime = currentTime;
-
-      this.timeLog.push(currentTime);
-      if (this.timeLog.length == 6) this.timeLog.shift();
-    }
-  }
-
-  canAnnounce() {
-    if (this.isYouTube) {
-      let lastFour = this.timeLog.slice(-4);
-      let diffOne = lastFour[3] - lastFour[2];
-      let diffTwo = lastFour[2] - lastFour[1];
-      let diffThree = lastFour[1] - lastFour[0];
-
-      return (diffOne + diffTwo + diffThree) > 7.85 ? false : true;
-    }
-    return true;
-  }
-
-  async loadAudioFiles() {
-    for await (let audioObj of announcer.getAudioFiles()) {
-      this.audioFiles.set(audioObj.fileName, audioObj.data);
-    }
-  }
-
-  async playAudio(scenarioType) {
-    let source = this.audioContext.createBufferSource();
-
-    let scenario = statsInfo.scenarios[scenarioType];
-    let fileName = scenario[Math.floor(Math.random() * scenario.length)];
-
-    let audioBuffer;
-    if (this.audioBuffers.has(fileName)) {
-      audioBuffer = this.audioBuffers.get(fileName);
-    } else {
-      let audioFile = this.audioFiles.get(fileName);
-      audioBuffer = await this.audioContext.decodeAudioData(audioFile);
-    }
-
-    source.buffer = audioBuffer;
-    source.connect(this.audioContext.destination);
-    source.start();
-
-    if (!this.audioBuffers.has(fileName)) {
-      this.audioFiles.delete(fileName);
-      this.audioBuffers.set(fileName, audioBuffer);
-    }
-  }
-
-  updateDeaths(team, dead) {
-    if (dead) {
-      if (team === 'blue') {
-        this.blueDead += 1;
-      } else {
-        this.redDead += 1;
-      }
-    } else {
-      if (team === 'blue') {
-        this.blueDead -= 1;
-        if (this.blueAce) this.blueAce = false;
-      } else {
-        this.redDead -= 1;
-        if (this.redAce) this.redAce = false;
-      }
-    }
-
-    if (this.blueDead === 5 && !this.blueAce) {
-      this.blueAce = true;
-      this.playAudio('ace');
-    } else if (this.redDead === 5 && !this.redAce) {
-      this.redAce = true;
-      this.playAudio('ace');
-    }
-  }
-
-  async reset() {
-    this.blueDead = 0;
-    this.redDead = 0;
-    this.totalKills = 0;
-
-    this.blueAce = false;
-    this.redAce = false;
-
-    // setting allyTeam
-    let allyTeams = await getFromStorage(ALLY_TEAMS);
-    if (allyTeams !== 'None') {
-      let teams = await getTeams();
-      for (let team of teams) {
-        if (allyTeams.includes(team)) {
-          this.allyTeam = team;
-          break;
-        }
-      }
-    } else {
-      setToStorage(ALLY_TEAMS, []);
-    }
-  }
-}
-
-const statsInfo = new StatsInfo();
+let statsInfo;
 
 function videoInfoHandler(event) {
   let eventData = JSON.parse(event.data);
@@ -133,18 +15,6 @@ function videoInfoHandler(event) {
     if (!statsInfo.isYouTube) statsInfo.isYouTube = true;
     statsInfo.logTime(eventData.info.currentTime);
   }
-}
-
-async function getTeams() {
-  // Get the teams currently playing
-  let teams = await getElementBySelector('.match .teams');
-  let result = [];
-  for (let element of teams.children) {
-    if (element.className === 'team') {
-      result.push(element.firstChild.textContent);
-    }
-  }
-  return result;
 }
 
 
@@ -284,9 +154,7 @@ function getDeathObserver(playerElement) {
     }
   });
 
-  let config = { attributeFilter: ['class'], attributeOldValue: true };
-  observer.observe(playerElement, config);
-
+  observer.observe(playerElement, { attributeFilter: ['class'] });
   return observer;
 }
 
@@ -296,83 +164,60 @@ async function setUpStatsObserver(tabState) {
   let observers = [];
   let hasAddedObservers = false;
 
-  let observer = new MutationObserver(async (mutationRecords) => {
-    for (let element of mutation.targetElementsIterator(mutationRecords)) {
-      if (element.childElementCount === 3) {
-        if (hasAddedObservers) break;
-        hasAddedObservers = true;
+  let addedObserver = new MutationObserver((records) => {
+    for (let element of mutation.addedRecordsIterator(records, 'StatsTeamsPlayers')) {
+      if (hasAddedObservers) break;
+      hasAddedObservers = true;
 
-        let teamsPlayers = await getElementBySelector('.StatsTeamsPlayers');
-        for (let statsTeam of teamsPlayers.children) {
+      for (let statsTeam of element.children) {
 
-          let className = statsTeam.className;
-          if (className === 'blue-team' || className === 'red-team') {
+        let className = statsTeam.className;
+        if (className === 'blue-team' || className === 'red-team') {
 
-            for (let player of statsTeam.children) {
-              let kdaObserver = getKDAObserver(player);
-              let deathObserver = getDeathObserver(player);
+          for (let player of statsTeam.children) {
+            let kdaObserver = getKDAObserver(player);
+            let deathObserver = getDeathObserver(player);
 
-              observers.push(kdaObserver, deathObserver);
+            observers.push(kdaObserver, deathObserver);
 
-              tabState.addObserver(kdaObserver);
-              tabState.addObserver(deathObserver);
-            }
+            tabState.addObserver(kdaObserver);
+            tabState.addObserver(deathObserver);
           }
         }
-      } else {
-        hasAddedObservers = false;
-
-        for (let observer of observers) {
-          observer.disconnect();
-        }
-        observers = [];
-
-        statsInfo.reset();
       }
     }
   });
 
-  let targetElement = getElementBySelector('.overview-pane');
-  observer.observe((await targetElement), { childList: true });
+  let removedObserver = new MutationObserver((records) => {
+    for (let _ of mutation.removedRecordsIterator(records, 'StatsTeamsPlayers')) {
+      hasAddedObservers = false;
 
-  tabState.addObserver(observer);
+      for (let observer of observers) {
+        observer.disconnect();
+      }
+      observers = [];
+
+      statsInfo.reset();
+    }
+  });
+
+  let config = { childList: true, subtree: true };
+  addedObserver.observe(document.body, config);
+  removedObserver.observe(document.body, config);
+
+  tabState.addObserver(addedObserver);
+  tabState.addObserver(removedObserver);
 }
 
 async function init(tabState) {
-  statsInfo.announcerState = await getFromStorage(ANNOUNCER);
-  if (statsInfo.announcerState) {
+  let announcerState = await getFromStorage(ANNOUNCER);
+  if (announcerState) {
+    statsInfo = new StatsInfo();
     setUpStatsObserver(tabState);
 
+    options.init(tabState, statsInfo);
+
     window.addEventListener('message', videoInfoHandler);
-
-    // Having the check after the handler is set to prevent scenario where the
-    // download of missing files holds up setting up of handler.
-    await announcer.checkFiles();
-    statsInfo.loadAudioFiles();
-
-    statsInfo.scenarios = await announcer.getScenarios();
-  }
-
-  let teamsElement = await getElementBySelector('.EventMatchScore .match .teams');
-  for (let element of teamsElement.children) {
-    if (element.className === 'team') {
-      element.firstElementChild.addEventListener('click', async (event) => {
-        let team = event.target.textContent;
-        statsInfo.allyTeam = team;
-
-        let allyTeams = await getFromStorage(ALLY_TEAMS);
-        let index = allyTeams.indexOf(team);
-        if (index != -1) {
-          let temp = allyTeams[0];
-          allyTeams[0] = team;
-          allyTeams[index] = temp;
-        } else {
-          allyTeams.unshift(team);
-        }
-
-        setToStorage(ALLY_TEAMS, allyTeams);
-      });
-    }
   }
 }
 

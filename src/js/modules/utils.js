@@ -1,4 +1,4 @@
-export { getFromStorage, setToStorage, createNotification };
+export { getFromStorage, setToStorage };
 
 function assertStorageType(storageType) {
   const storageTypes = ['local', 'sync', 'managed'];
@@ -18,13 +18,4 @@ function setToStorage(key, value, storageType = 'local') {
   assertStorageType(storageType);
   browser.storage[storageType].set({ [key]: value });
   /* beautify preserve:end */
-}
-
-async function createNotification(message) {
-  return (await browser.notifications.create({
-    type: 'basic',
-    iconUrl: browser.runtime.getURL('img/logo_48.png'),
-    title: 'LoL Esports Enhancer',
-    message
-  }));
 }
