@@ -57,7 +57,7 @@ function resetOptions() {
 
 
 function getAllySectionHandler(statsInfo) {
-  return async function() {
+  return async function handler() {
     let watchOptions = document.querySelector('.WatchOptions');
     watchOptions.classList.add('active');
 
@@ -66,18 +66,18 @@ function getAllySectionHandler(statsInfo) {
       parent.children[index].setAttribute('hidden', '');
     }
 
-    let optionsSection = createElement('div', 'options-section ally-selection');
-    optionsSection.appendChild(createContentDiv('title', 'SELECT AN ALLY TEAM'));
-    parent.appendChild(optionsSection);
+    let allySection = createElement('div', 'options-section ally-selection');
+    allySection.appendChild(createContentDiv('title', 'SELECT AN ALLY TEAM'));
+    parent.appendChild(allySection);
 
     let optionsList = createElement('ul', 'options-list');
-    optionsSection.appendChild(optionsList);
+    allySection.appendChild(optionsList);
 
     for await (let team of getTeamNames()) {
       optionsList.appendChild(createOption(statsInfo, team));
     }
     optionsList.appendChild(createOption(statsInfo, 'None'));
-  }
+  };
 }
 
 
@@ -104,7 +104,7 @@ async function addAllySection(statsInfo) {
 }
 
 async function getOptionsObserver() {
-  let observer = new MutationObserver((records) => {
+  let observer = new MutationObserver(records => {
     if (!records[0].target.classList.contains('active')) {
       resetOptions();
     }

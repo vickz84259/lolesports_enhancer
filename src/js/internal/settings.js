@@ -14,7 +14,7 @@ const currentSettings = {
   changed: false,
   announcerType: '',
   locale: '',
-}
+};
 
 function toggle(event) {
   for (let id of IDS) {
@@ -57,7 +57,8 @@ function save(event) {
   utils.setToStorage(keys.ANNOUNCER, announcerToggle);
 
   if (announcerToggle) {
-    let announcerType = document.querySelector('input[name="announcer"]:checked').value;
+    let announcerSelector = 'input[name="announcer"]:checked';
+    let announcerType = document.querySelector(announcerSelector).value;
     if (announcerType !== currentSettings.announcerType) {
       currentSettings.announcer = announcerType;
       currentSettings.changed = true;

@@ -23,7 +23,7 @@ function getHandler(properties) {
 
   let tabState = new TabState();
 
-  return function(message) {
+  return function handler(message) {
     if (currentLink) previousLink = currentLink;
     currentLink = message.url;
 
@@ -49,5 +49,5 @@ function getHandler(properties) {
         handler();
       }
     }
-  }
+  };
 }

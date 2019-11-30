@@ -5,12 +5,12 @@ const OBJ_STORE = 'announcersStore';
 const DB_VERSION = 1;
 
 
-export async function getDB() {
-  return (await openDB(DB_NAME, DB_VERSION, {
+export function getDB() {
+  return openDB(DB_NAME, DB_VERSION, {
     upgrade(db) {
       db.createObjectStore(OBJ_STORE);
     }
-  }));
+  });
 }
 
 export function getTransaction(db, readOnly = true) {

@@ -26,7 +26,8 @@ class BaseStats {
 
     if (team) {
       let index = this.allyTeams.indexOf(team);
-      if (index != -1) {
+
+      if (index >= 0) {
         let temp = this.allyTeams[0];
         this.allyTeams[0] = team;
         this.allyTeams[index] = temp;
@@ -57,7 +58,7 @@ class BaseStats {
     let scenarios = this.scenarios[scenarioType];
     let fileName = scenarios[Math.floor(Math.random() * scenarios.length)];
 
-    let audioBuffer;
+    let audioBuffer = null;
     if (this.audioBuffers.has(fileName)) {
       audioBuffer = this.audioBuffers.get(fileName);
     } else {
@@ -80,16 +81,16 @@ class BaseStats {
     this._allyTeam = null;
 
     this.allyTeams = await getFromStorage(ALLY_TEAMS);
-    if (this.allyTeams !== 'None') {
+    if (this.allyTeams === 'None') {
+      this.allyTeams = [];
+      setToStorage(ALLY_TEAMS, this.allyTeams);
+    } else {
       for await (let teamName of getTeamNames()) {
         if (this.allyTeams.includes(teamName)) {
           this._allyTeam = teamName;
           break;
         }
       }
-    } else {
-      this.allyTeams = [];
-      setToStorage(ALLY_TEAMS, this.allyTeams);
     }
   }
 }
@@ -113,7 +114,7 @@ export class StatsInfo extends BaseStats {
       this.previousTime = currentTime;
 
       this.timeLog.push(currentTime);
-      if (this.timeLog.length == 6) this.timeLog.shift();
+      if (this.timeLog.length === 6) this.timeLog.shift();
     }
   }
 
@@ -125,7 +126,7 @@ export class StatsInfo extends BaseStats {
       let diffTwo = lastFour[2] - lastFour[1];
       let diffThree = lastFour[1] - lastFour[0];
 
-      return (diffOne + diffTwo + diffThree) > 7.85 ? false : true;
+      return !((diffOne + diffTwo + diffThree) > 7.85);
     }
     return true;
   }

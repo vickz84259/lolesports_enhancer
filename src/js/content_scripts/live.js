@@ -4,7 +4,7 @@ import * as link_state from '../modules/link_state.js';
 import * as stats from '../modules/stats.js';
 
 
-let link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/live(?:\/\w+\/[a-zA-Z0-9_\-]{11})?$/;
+let link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/live(?:\/\w+\/[a-zA-Z0-9_-]{11})?$/;
 let properties = {
   portName: 'live',
   regexPattern: link_regex,

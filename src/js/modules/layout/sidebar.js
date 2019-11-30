@@ -12,8 +12,7 @@ export { init };
 const LISTENERS_STATE = new Map();
 
 function addListener(eventTarget, layoutType) {
-  // This works even if the value is undefined
-  let listenerState = (LISTENERS_STATE.get(layoutType)) ? true : false;
+  let listenerState = typeof LISTENERS_STATE.get(layoutType) !== 'undefined';
   if (!listenerState) {
     eventTarget.addEventListener('click', () => changeLayout(layoutType));
     if (!layout.isRightSB(layoutType)) LISTENERS_STATE.set(layoutType, true);
@@ -30,15 +29,16 @@ async function getVideoPlayerWidth() {
   return parseInt(videoPlayer.style.width, 10);
 }
 
-async function getMaxVideoWidth() {
-  return (await getFromStorage(MAX_VIDEO_SIZE));
+function getMaxVideoWidth() {
+  return getFromStorage(MAX_VIDEO_SIZE);
 }
 
 async function moveSideBar(newLayout) {
   /* The function moves the sidebar either to the top or to the bottom
     This requires the video player to be resized accordingly */
 
-  let parent, sibling;
+  let parent = null;
+  let sibling = null;
   if (layout.isRightSB(newLayout)) {
     // move the sidebar from the bottom to the top
     sibling = document.querySelector('.center-pane');
@@ -59,13 +59,13 @@ async function moveSideBar(newLayout) {
 
   if (layout.isRightSB(newLayout)) {
     // reduce size of video player
-    videoPlayer.style.width = (videoWidth - sideBarWidth) + 'px';
+    videoPlayer.style.width = `${videoWidth - sideBarWidth}px`;
 
   } else if (layout.isTheatre(newLayout)) {
     // increase size of video player
     let videoPlayerWidth = (videoWidth + sideBarWidth);
     if (videoPlayerWidth <= (await getMaxVideoWidth())) {
-      videoPlayer.style.width = videoPlayerWidth + 'px';
+      videoPlayer.style.width = `${videoPlayerWidth}px`;
     }
   }
 }
@@ -79,13 +79,14 @@ async function changeLayout(newLayout, init = false) {
     if (currentLayout !== newLayout || init) {
       // move the side bar left or right
       let isLeftSB = layout.isLeftSB(newLayout);
-      let flex = (isLeftSB) ? 'flex-direction: row;' : 'flex-direction: row-reverse;';
+      let flex = (isLeftSB) ?
+        'flex-direction: row;' : 'flex-direction: row-reverse;';
 
       document.querySelector('.Watch.large').setAttribute('style', flex);
 
       // move the video player to the left or right
       let videoPlayer = document.getElementById('video-player');
-      let videoLeftStyle = (await getSideBarWidth()) + 'px';
+      let videoLeftStyle = `${await getSideBarWidth()}px`;
       videoPlayer.style.left = (isLeftSB) ? videoLeftStyle : '0px';
     }
   } else {
@@ -95,7 +96,7 @@ async function changeLayout(newLayout, init = false) {
 
   if (layout.isRightSB(newLayout) && !init) {
     // close the options button
-    // The init check prevents from this leading to the options button being opened
+    // The init flag prevents this from opening the options button
     document.querySelector('.options-button').click();
   }
 
@@ -132,8 +133,10 @@ async function setExtraOption() {
 async function setUpLayoutObserver() {
   // This observer checks if the user has opened the options to switch the stats
   // layout which triggers a mutation.
-  let observer = new MutationObserver(async (records) => {
-    for (let _ of mutation.addedRecordsIterator(records, 'WatchOptionsLayout')) {
+  let observer = new MutationObserver(async records => {
+    for (let _ of mutation.addedRecordsIterator(records, 'WatchOptionsLayout')
+    ) {
+      // eslint-disable-next-line no-await-in-loop
       await setExtraOption();
 
       // Add eventListener to theatre option
@@ -145,6 +148,7 @@ async function setUpLayoutObserver() {
 
       // Set UI for currently selected layout
       // This is needed when the right sidebar is the selected option
+      // eslint-disable-next-line no-await-in-loop
       let currentLayout = await layout.getCurrent();
       if (layout.isRightSB(currentLayout)) {
         // remove the previously selected option
@@ -172,7 +176,8 @@ async function init(tabState) {
   if (result === 'None') {
     // Setup the max video player size
     let currentLayout = await layout.getCurrent();
-    let notTheatre = layout.isLeftSB(currentLayout) || layout.isRightSB(currentLayout);
+    let notTheatre = layout.isLeftSB(currentLayout) ||
+      layout.isRightSB(currentLayout);
 
     let value = (notTheatre) ? (await getSideBarWidth()) : 0;
     value += (await getVideoPlayerWidth());

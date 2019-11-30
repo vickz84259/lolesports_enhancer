@@ -6,9 +6,9 @@ function createNotification(message) {
 }
 
 function main() {
-  browser.runtime.onMessage.addListener((msg) => {
+  browser.runtime.onMessage.addListener(msg => {
     if (msg.destination === 'notification') {
-      createNotification(msg.data)
+      createNotification(msg.data);
     }
   });
 }

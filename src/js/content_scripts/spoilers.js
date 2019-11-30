@@ -10,16 +10,15 @@ function hideSpoiler(match) {
     let result = link.querySelector('.teams');
 
     let classList = result.classList;
-    /* beautify ignore:start */
     (classList.contains('winner-team2')) ?
       classList.add('winner-team1') : classList.add('winner-team2');
-    /* beautify ignore:end */
 
+    /* TODO: Revisit the logic exhibited here */
     let score = result.querySelector('.score');
-    if (score !== null) {
-      score.classList.replace('score', 'versus');
-    } else {
+    if (score === null) {
       score = result.querySelector('.versus');
+    } else {
+      score.classList.replace('score', 'versus');
     }
 
     score.textContent = 'VS';

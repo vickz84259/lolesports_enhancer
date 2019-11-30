@@ -5,9 +5,11 @@ async function getElement(id = null, selector = null) {
   The function will repeatedly try getting said element after a slight delay
   between each call */
   while (true) {
-    let result = (id) ? document.getElementById(id) : document.querySelector(selector);
+    let result = (id) ?
+      document.getElementById(id) : document.querySelector(selector);
     if (result) return result;
 
+    // eslint-disable-next-line no-await-in-loop
     await delay();
   }
 }
@@ -23,9 +25,9 @@ function getElementBySelector(selector) {
 }
 
 function delay(timeout = 1000) {
-  let promise = new Promise((resolve) => {
+  let promise = new Promise(resolve => {
     setTimeout(() => resolve(), timeout);
-  })
+  });
 
   return promise;
 }

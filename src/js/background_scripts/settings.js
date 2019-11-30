@@ -5,8 +5,9 @@ function main() {
     browser.runtime.openOptionsPage();
   });
 
-  browser.runtime.onMessage.addListener(async (message) => {
-    if (message.destination === 'settings' && message.data === 'settings_updated') {
+  browser.runtime.onMessage.addListener(message => {
+    if (message.destination === 'settings' &&
+        message.data === 'settings_updated') {
       announcer.checkFiles();
     }
   });

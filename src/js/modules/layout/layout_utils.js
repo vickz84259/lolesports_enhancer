@@ -1,13 +1,6 @@
 import { getFromStorage, setToStorage } from '../utils.js';
 import { getElementBySelector } from '../DOM_utils.js';
 
-export {
-  getCurrentLayout as getCurrent,
-  setCurrentLayout as setCurrent,
-  getOppositeLayout as getOpposite,
-  Layouts, getSelectedOption, getOptions, getOptionsList, isLeftSB, isRightSB,
-  isTheatre,
-};
 
 /* Creating an Enum to hold the various layout options.
   This will be achieved by freezing an object */
@@ -25,14 +18,15 @@ async function _getCurrentLayout() {
     let style = window.getComputedStyle(mainArea);
     let flexDirection = style.getPropertyValue('flex-direction');
 
-    return (flexDirection === 'row-reverse') ? Layouts.SIDEBAR_RIGHT : Layouts.SIDEBAR_LEFT;
+    return (flexDirection === 'row-reverse') ?
+      Layouts.SIDEBAR_RIGHT : Layouts.SIDEBAR_LEFT;
   }
 
   return Layouts.THEATRE;
 }
 
 async function getCurrentLayout(fromStorage = true) {
-  if (!fromStorage) return (await _getCurrentLayout());
+  if (!fromStorage) return _getCurrentLayout();
 
   let layout = await getFromStorage('layout');
   if (layout === 'None') {
@@ -59,11 +53,15 @@ function* getOptions() {
 }
 
 function getSelectedOption() {
+  let result = null;
   for (let option of getOptions()) {
     if (option.classList.contains('selected')) {
-      return option;
+      result = option;
+      break;
     }
   }
+
+  return result;
 }
 
 let isLeftSB = layout => layout === Layouts.SIDEBAR_LEFT;
@@ -73,3 +71,11 @@ let isTheatre = layout => layout === Layouts.THEATRE;
 function getOppositeLayout(layout) {
   return (isLeftSB(layout)) ? Layouts.SIDEBAR_RIGHT : Layouts.SIDEBAR_LEFT;
 }
+
+export {
+  getCurrentLayout as getCurrent,
+  setCurrentLayout as setCurrent,
+  getOppositeLayout as getOpposite,
+  Layouts, getSelectedOption, getOptions, getOptionsList, isLeftSB, isRightSB,
+  isTheatre,
+};

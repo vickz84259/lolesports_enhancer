@@ -7,7 +7,7 @@ import { StatsInfo } from './stats/statsInfo.js';
 export { init, disconnect };
 
 
-let statsInfo;
+let statsInfo = null;
 
 function videoInfoHandler(event) {
   let eventData = JSON.parse(event.data);
@@ -20,7 +20,8 @@ function videoInfoHandler(event) {
 
 function getKDAObserver(playerElement) {
   let consecutiveKills = 0;
-  let team = (playerElement.parentElement.className === 'blue-team') ? 'blue' : 'red';
+  let team = (playerElement.parentElement.className === 'blue-team') ?
+    'blue' : 'red';
   let enemyTeam = (team === 'blue') ? 'red' : 'blue';
 
   let playerName = playerElement.firstElementChild.textContent;
@@ -29,15 +30,12 @@ function getKDAObserver(playerElement) {
   let multiKill = 0;
   let totalKills = 0;
 
-  let observer = new MutationObserver((mutationRecords) => {
+  let observer = new MutationObserver(mutationRecords => {
     let type = mutationRecords[0].target.parentElement.className;
     if (type === 'deaths') {
       consecutiveKills = 0;
     } else {
       if (statsInfo.canAnnounce()) {
-        let condition = (statsInfo.allyTeam && playerName.includes(statsInfo.allyTeam));
-        let isAlly = (condition) ? true : false;
-
         let currentTime = Date.now();
         let timeDiff = (currentTime - lastKill) / 1000;
         lastKill = currentTime;
@@ -58,6 +56,9 @@ function getKDAObserver(playerElement) {
           }
           totalKills = newValue;
           consecutiveKills += kills;
+
+          let enemyAce = (enemyTeam === 'blue') ?
+            statsInfo.blueAce : statsInfo.redAce;
 
           let scenarioType = '';
           switch (multiKill) {
@@ -97,10 +98,12 @@ function getKDAObserver(playerElement) {
               scenarioType = 'quadra';
               break;
             case 5:
-              let enemyAce = (enemyTeam === 'blue') ? statsInfo.blueAce : statsInfo.redAce;
               if (timeDiff <= 30.0 && enemyAce) {
                 scenarioType = 'penta';
               }
+              break;
+            default:
+              console.log('unknown scenario');
               break;
           }
           if (statsInfo.totalKills === 0) {
@@ -108,7 +111,7 @@ function getKDAObserver(playerElement) {
           }
 
           if (statsInfo.allyTeam) {
-            if (isAlly) {
+            if (playerName.includes(statsInfo.allyTeam)) {
               if (scenarioType === 'ally') {
                 scenarioType = 'enemy';
               } else {
@@ -141,9 +144,10 @@ function getKDAObserver(playerElement) {
 
 function getDeathObserver(playerElement) {
   let isDead = false;
-  let team = (playerElement.parentElement.className === 'blue-team') ? 'blue' : 'red';
+  let team = (playerElement.parentElement.className === 'blue-team') ?
+    'blue' : 'red';
 
-  let observer = new MutationObserver((mutationRecords) => {
+  let observer = new MutationObserver(mutationRecords => {
     let target = mutationRecords[0].target;
     if (target.classList.contains('dead') && !isDead) {
       isDead = true;
@@ -159,13 +163,14 @@ function getDeathObserver(playerElement) {
 }
 
 
-async function setUpStatsObserver(tabState) {
+function setUpStatsObserver(tabState) {
   // This observer checks if the team stats div has been added
   let observers = [];
   let hasAddedObservers = false;
 
-  let addedObserver = new MutationObserver((records) => {
-    for (let element of mutation.addedRecordsIterator(records, 'StatsTeamsPlayers')) {
+  let addedObserver = new MutationObserver(records => {
+    let elements = mutation.addedRecordsIterator(records, 'StatsTeamsPlayers');
+    for (let element of elements) {
       if (hasAddedObservers) break;
       hasAddedObservers = true;
 
@@ -188,8 +193,9 @@ async function setUpStatsObserver(tabState) {
     }
   });
 
-  let removedObserver = new MutationObserver((records) => {
-    for (let _ of mutation.removedRecordsIterator(records, 'StatsTeamsPlayers')) {
+  let removedObserver = new MutationObserver(records => {
+    let removed = mutation.removedRecordsIterator(records, 'StatsTeamsPlayers');
+    for (let _ of removed) {
       hasAddedObservers = false;
 
       for (let observer of observers) {

@@ -54,9 +54,11 @@ export async function checkFiles() {
   let db = await storage.getDB();
   let savedFiles = await storage.getAllKeys(db);
 
-  let settings = await getAnnouncerSettings();
   let promises = [];
-  for await (let fileName of getFileNames(settings.announcerType, settings.locale)) {
+
+  let settings = await getAnnouncerSettings();
+  let fileNames = getFileNames(settings.announcerType, settings.locale);
+  for await (let fileName of fileNames) {
     if (!(savedFiles.includes(fileName))) {
       console.log(`downloading ${fileName}`);
       promises.push(download(fileName, db));
@@ -73,7 +75,7 @@ export async function getScenarios() {
   let scenarios = response.categories;
 
   for (let key in scenarios) {
-    scenarios[key] = scenarios[key].map((item) => {
+    scenarios[key] = scenarios[key].map(item => {
       let fileName = getPaddedFileName(item);
       return `${settings.announcerType}/${settings.locale}/${fileName}`;
     });
@@ -86,7 +88,8 @@ export async function* getAudioFiles() {
   let db = await storage.getDB();
 
   let settings = await getAnnouncerSettings();
-  for await (let fileName of getFileNames(settings.announcerType, settings.locale)) {
+  let fileNames = getFileNames(settings.announcerType, settings.locale);
+  for await (let fileName of fileNames) {
     let data = await storage.get(db, fileName);
     yield { fileName, data };
   }
