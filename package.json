@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "idb": "^4.0.5"
+  },
+  "devDependencies": {
+    "rollup-plugin-cleanup": "^3.1.1",
+    "rollup-plugin-node-resolve": "^5.2.0"
+  }
+}
