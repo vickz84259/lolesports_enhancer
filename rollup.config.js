@@ -1,5 +1,6 @@
 import resolve from 'rollup-plugin-node-resolve';
 import cleanup from 'rollup-plugin-cleanup';
+import { eslint } from 'rollup-plugin-eslint';
 
 let srcDir = 'src/js';
 let buildDir = 'builds/js';
@@ -22,6 +23,7 @@ export default files.map(file => ({
     format: 'iife'
   },
   plugins: [
+    eslint({ throwOnError: true }),
     resolve({ customResolveOptions: { moduleDirectory: 'node_modules' } }),
     cleanup({ comments: 'none' })
   ]
