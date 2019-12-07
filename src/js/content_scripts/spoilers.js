@@ -3,17 +3,26 @@
 import * as link_state from '../modules/link_state.js';
 import * as mutation from '../modules/mutation.js';
 
+/**
+ * Function that does the actual UI changes to hide spoilers
+ *
+ * @param {Element} match
+ */
 function hideSpoiler(match) {
-  let link = match.querySelector('a.past');
+  const link = match.querySelector('a.past');
 
   if (link !== null) {
-    let result = link.querySelector('.teams');
+    const result = link.querySelector('.teams');
 
-    let classList = result.classList;
+    const classList = result.classList;
     (classList.contains('winner-team2')) ?
       classList.add('winner-team1') : classList.add('winner-team2');
 
-    /* TODO: Revisit the logic exhibited here */
+    /**
+     * @todo Revisit the logic exhibited here
+     *
+     * @type {Element}
+     */
     let score = result.querySelector('.score');
     if (score === null) {
       score = result.querySelector('.versus');
@@ -23,49 +32,67 @@ function hideSpoiler(match) {
 
     score.textContent = 'VS';
 
-    let teams = link.getElementsByClassName('team');
-    for (let team of teams) {
-      let matchHistory = team.querySelector('.team-info .winloss');
+    const teams = link.getElementsByClassName('team');
+    for (const team of teams) {
+      const matchHistory = team.querySelector('.team-info .winloss');
       if (matchHistory !== null) {
         matchHistory.remove();
       }
 
-      let teamName = team.querySelector('.team-info h2');
+      const teamName = team.querySelector('.team-info h2');
       teamName.setAttribute('style', 'color: #555d64');
     }
   }
 }
 
+
+/**
+ * This observer is used after the page has loaded and the initial schedule
+ * list has been displayed. It only keeps track of changes to the Events list
+ * and its children.
+ *
+ * @returns {MutationObserver}
+ */
 function observeMatches() {
-  // This observer is used after the page has loaded and the initial schedule
-  // list has been displayed. It only keeps track of changes to the Events list
-  // and its children.
-  let observer = new MutationObserver(mutationRecords => {
-    for (let mutationRecord of mutationRecords) {
-      let event = mutationRecord.target;
-      for (let eventMatch of event.getElementsByClassName('EventMatch')) {
+  const observer = new MutationObserver(mutationRecords => {
+    for (const mutationRecord of mutationRecords) {
+
+      /** @type {Element} */
+      const event = (mutationRecord.target);
+      for (const eventMatch of event.getElementsByClassName('EventMatch')) {
         hideSpoiler(eventMatch);
       }
     }
   });
 
-  let targetElement = document.body.querySelector('.Schedule .events .Event');
+  const targetElement = document.body.querySelector('.Schedule .events .Event');
   observer.observe(targetElement, { childList: true });
 
   return observer;
 }
 
+/**
+ * Processes the spoilers when the DOM is initially loaded.
+ *
+ * @param {Node} node
+ */
 function processEventNode(node) {
-  for (let match of mutation.filteredNodes(node.childNodes, 'EventMatch')) {
+  for (const match of mutation.filteredNodes(node.childNodes, 'EventMatch')) {
     hideSpoiler(match);
   }
 }
 
+/**
+ * Initialises the base observer.
+ *
+ * @param {link_state.TabStateDef} tabState
+ */
 function initBaseObserver(tabState) {
   // The initial observer looks for changes within the body tag and its
   // descendants. This is only reasonable when first visiting the page.
-  let observer = new MutationObserver((mutationRecords, currentObserver) => {
-    for (let node of mutation.addedRecordsIterator(mutationRecords, 'Event')) {
+  const observer = new MutationObserver((mutationRecords, currentObserver) => {
+    for (const node of mutation.addedRecordsIterator(mutationRecords, 'Event')
+    ) {
       processEventNode(node);
 
       // Disconnecting this observer and initialising the second one.
@@ -75,13 +102,13 @@ function initBaseObserver(tabState) {
     }
   });
 
-  let config = { childList: true, subtree: true };
+  const config = { childList: true, subtree: true };
   observer.observe(document.body, config);
   tabState.addObserver(observer);
 }
 
-let link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/schedule(?:\?\S+)?$/;
-let properties = {
+const link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/schedule(?:\?\S+)?$/;
+const properties = {
   portName: 'spoilers',
   regexPattern: link_regex,
   init_functions: [initBaseObserver],

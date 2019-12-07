@@ -14,15 +14,15 @@ TODO:
     position*/
 // eslint-disable-next-line
 async function moveCookieButton() {
-  let cookieBtn = getElementBySelector('.riotbar-cookie-policy-v2.cookie-link');
-  let streamSelector = getElementBySelector('.stream-selector');
+  const btn = getElementBySelector('.riotbar-cookie-policy-v2.cookie-link');
+  const streamSelector = getElementBySelector('.stream-selector');
 
-  let nav = await getElementBySelector('.nav-details .nav');
-  nav.insertBefore((await cookieBtn), (await streamSelector));
+  const nav = await getElementBySelector('.nav-details .nav');
+  nav.insertBefore((await btn), (await streamSelector));
 }
 
-let link_regex = /https:\/\/watch\.(?:\w+\.)?lolesports\.com\/vod\/\d+\/\d{1}(?:\/[a-zA-Z0-9_-]{11})?/;
-let properties = {
+const link_regex = /https:\/\/watch\.(?:\w+\.)?lolesports\.com\/vod\/\d+\/\d{1}(?:\/[a-zA-Z0-9_-]{11})?/;
+const properties = {
   portName: 'vod',
   regexPattern: link_regex,
   init_functions: [sidebar.init, stats.init],

@@ -11,12 +11,16 @@ const Layouts = Object.freeze({
 });
 
 
+/**
+ * Retrieves the current layout being displayed
+ *
+ * @returns {Promise<string>} the layout name
+ */
 async function _getCurrentLayout() {
-  // Retrieves the current layout being displayed
-  let mainArea = await getElementBySelector('.Watch.large');
+  const mainArea = await getElementBySelector('.Watch.large');
   if (mainArea.children.length === 2) {
-    let style = window.getComputedStyle(mainArea);
-    let flexDirection = style.getPropertyValue('flex-direction');
+    const style = window.getComputedStyle(mainArea);
+    const flexDirection = style.getPropertyValue('flex-direction');
 
     return (flexDirection === 'row-reverse') ?
       Layouts.SIDEBAR_RIGHT : Layouts.SIDEBAR_LEFT;
@@ -25,9 +29,18 @@ async function _getCurrentLayout() {
   return Layouts.THEATRE;
 }
 
+
+/**
+ * @param {boolean} fromStorage - Determines whether the layout setting to be
+ *    gotten from the previously saved settings or determined from the layout
+ *    that is currently on display
+ *
+ * @returns {Promise<string>} the layout name
+ */
 async function getCurrentLayout(fromStorage = true) {
   if (!fromStorage) return _getCurrentLayout();
 
+  /** @type {string} */
   let layout = await getFromStorage('layout');
   if (layout === 'None') {
     layout = await _getCurrentLayout();
@@ -36,6 +49,12 @@ async function getCurrentLayout(fromStorage = true) {
   return layout;
 }
 
+
+/**
+ * Save the current layout setting to storage
+ *
+ * @param {string} layout - The layout currently selected
+ */
 function setCurrentLayout(layout) {
   if (Object.values(Layouts).includes(layout)) {
     setToStorage('layout', layout);
@@ -44,17 +63,27 @@ function setCurrentLayout(layout) {
   }
 }
 
-let getOptionsList = () => document.querySelector('.layouts.options-list');
+/** @returns {HTMLElement} */
+const getOptionsList = () => document.querySelector('.layouts.options-list');
 
+
+/**
+ * Generator that yields the layout options available to the user
+ *
+ * @yields {HTMLElement}
+ * @returns {Generator<HTMLElement,any,unknown>}
+ */
 function* getOptions() {
-  for (let option of getOptionsList().children) {
-    yield option;
+  for (const option of getOptionsList().children) {
+    yield /** @type {HTMLElement} */ (option);
   }
 }
 
+/** @returns {HTMLElement} */
 function getSelectedOption() {
+  /** @type {?HTMLElement} */
   let result = null;
-  for (let option of getOptions()) {
+  for (const option of getOptions()) {
     if (option.classList.contains('selected')) {
       result = option;
       break;
@@ -64,10 +93,24 @@ function getSelectedOption() {
   return result;
 }
 
-let isLeftSB = layout => layout === Layouts.SIDEBAR_LEFT;
-let isRightSB = layout => layout === Layouts.SIDEBAR_RIGHT;
-let isTheatre = layout => layout === Layouts.THEATRE;
+/** @param {string} layout */
+const isLeftSB = layout => layout === Layouts.SIDEBAR_LEFT;
 
+/** @param {string} layout */
+const isRightSB = layout => layout === Layouts.SIDEBAR_RIGHT;
+
+/** @param {string} layout */
+const isTheatre = layout => layout === Layouts.THEATRE;
+
+
+/**
+ * This function assumes the layout passed is either the left or the right
+ * sidebar.
+ *
+ * @param {string} layout
+ *
+ * @returns {string}
+*/
 function getOppositeLayout(layout) {
   return (isLeftSB(layout)) ? Layouts.SIDEBAR_RIGHT : Layouts.SIDEBAR_LEFT;
 }

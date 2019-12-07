@@ -6,59 +6,84 @@ import { getJson } from './resources.js';
 const BASEURL = 'https://d3t82zuq6uoshl.cloudfront.net/';
 
 
+/**
+ * Pads a fileName with the appropriate number of zeros
+ *
+ * @param {number} fileNumber
+ *
+ * @returns {string} file name with the padded file number
+ */
 function getPaddedFileName(fileNumber) {
-  /* Pads a fileName with the appropriate number of zeros
-
-  Args:
-    fileNumber: Integer representing the file number
-
-  Returns:
-    A string representing the fileName with the padded file number
-  */
-  let padded = fileNumber.toString().padStart(4, 0);
+  const padded = fileNumber.toString().padStart(4, '0');
   return `File${padded}.mp3`;
 }
 
 
+/**
+ * Async Generator that gets all the filenames for a particular announcer type
+ * in a particular locale.
+ *
+ * @param {string} announcerType - The name of the announcer
+ * @param {string} locale - the announcer language locale
+ *
+ * @returns {AsyncGenerator<string, void, unknown>}
+ * @yields {string} - a file name
+ */
 async function* getFileNames(announcerType, locale) {
-  let response = await getJson(`json/${announcerType}.json`);
+  const response = await getJson(`json/${announcerType}.json`);
+  const fileNumbers = Object.values(response.categories);
 
-  let fileNumbers = Object.values(response.categories);
-  let fileNoSet = new Set([].concat(...fileNumbers));
-
-  for (let num of fileNoSet) {
-    let fileName = getPaddedFileName(num);
+  /** @type {Set<number>} */
+  const fileNoSet = new Set([].concat(...fileNumbers));
+  for (const num of fileNoSet) {
+    const fileName = getPaddedFileName(num);
     yield `${announcerType}/${locale}/${fileName}`;
   }
 }
 
 
+/**
+ * Downloads a file and saves it to disk in an indexedDB database
+ *
+ * @param {string} fileName - the file to be downloaded
+ * @param {?import('./storage.js').IDBPDatabase} [db] - The indexedDB database
+ *    if not provided, the default database will be used.
+ */
 async function download(fileName, db = null) {
-  let url = `${BASEURL}${fileName}`;
-  let audioFile = await (await fetch(url)).arrayBuffer();
+  const url = `${BASEURL}${fileName}`;
+  const audioFile = await (await fetch(url)).arrayBuffer();
 
   if (!db) db = (await storage.getDB());
   await storage.add(db, audioFile, fileName);
 }
 
 
+/**
+ * @returns {Promise<{announcerType: string, locale: string}>} Promise
+ *    containing the announcerType and the locale from the values stored in
+ *    storage
+*/
 async function getAnnouncerSettings() {
-  let announcerType = await getFromStorage(keys.ANNOUNCER_TYPE);
-  let locale = await getFromStorage(keys.ANNOUNCER_LANG);
+  const announcerType = await getFromStorage(keys.ANNOUNCER_TYPE);
+  const locale = await getFromStorage(keys.ANNOUNCER_LANG);
 
   return { announcerType, locale };
 }
 
 
+/**
+ * Checks for any missing audio files and downloads them
+ */
 export async function checkFiles() {
-  let db = await storage.getDB();
-  let savedFiles = await storage.getAllKeys(db);
+  const db = await storage.getDB();
+  const savedFiles = await storage.getAllKeys(db);
 
-  let promises = [];
+  /** @type {Promise[]} */
+  const promises = [];
 
-  let settings = await getAnnouncerSettings();
-  let fileNames = getFileNames(settings.announcerType, settings.locale);
-  for await (let fileName of fileNames) {
+  const settings = await getAnnouncerSettings();
+  const fileNames = getFileNames(settings.announcerType, settings.locale);
+  for await (const fileName of fileNames) {
     if (!(savedFiles.includes(fileName))) {
       console.log(`downloading ${fileName}`);
       promises.push(download(fileName, db));
@@ -69,28 +94,42 @@ export async function checkFiles() {
 }
 
 
+/**
+ * Retrieves the announcer's scenarios from the respective json resource file
+ *
+ * @returns {Promise<Object.<string, string[]>>}
+ */
 export async function getScenarios() {
-  let settings = await getAnnouncerSettings();
-  let response = await getJson(`json/${settings.announcerType}.json`);
-  let scenarios = response.categories;
+  const settings = await getAnnouncerSettings();
+  const response = await getJson(`json/${settings.announcerType}.json`);
 
-  for (let key in scenarios) {
-    scenarios[key] = scenarios[key].map(item => {
-      let fileName = getPaddedFileName(item);
+  /** @type {Object.<string, (string | number)[]>} */
+  const scenarios = response.categories;
+
+  for (const key in scenarios) {
+    scenarios[key] = scenarios[key].map(/** @param {number} item */item => {
+      const fileName = getPaddedFileName(item);
       return `${settings.announcerType}/${settings.locale}/${fileName}`;
     });
   }
-  return scenarios;
+  return /** @type {Object.<string, string[]>} */ (scenarios);
 }
 
-
+/**
+ * Retrieves the audio files saved on disk based on the current user settings.
+ *
+ * @returns {AsyncGenerator<{fileName: string, data: ArrayBuffer}, void,
+ *    unknown>}
+ * @yields {{fileName: string, data: ArrayBuffer}} Object containing the file
+ *  name and the audio data associated with it
+ */
 export async function* getAudioFiles() {
-  let db = await storage.getDB();
+  const db = await storage.getDB();
 
-  let settings = await getAnnouncerSettings();
-  let fileNames = getFileNames(settings.announcerType, settings.locale);
-  for await (let fileName of fileNames) {
-    let data = await storage.get(db, fileName);
+  const settings = await getAnnouncerSettings();
+  const fileNames = getFileNames(settings.announcerType, settings.locale);
+  for await (const fileName of fileNames) {
+    const data = await storage.get(db, fileName);
     yield { fileName, data };
   }
 }

@@ -1,6 +1,7 @@
 import * as utils from '../modules/utils.js';
 import * as keys from '../modules/keys.js';
 
+/** @type {string[]} */
 const IDS = [
   'Announcer_Global_Ahri',
   'Announcer_Global_Female1',
@@ -10,16 +11,27 @@ const IDS = [
   'locale'
 ];
 
+/** @type {{changed: boolean, announcerType: string, locale: string}} */
 const currentSettings = {
   changed: false,
   announcerType: '',
   locale: '',
 };
 
+
+/**
+ * Enables/disables the various form elements based on whether the user enables/
+ * disables the announcer settings.
+ *
+ * @param {MouseEvent} event
+ */
 function toggle(event) {
-  for (let id of IDS) {
-    let element = document.getElementById(id);
-    if (event.target.checked) {
+  for (const id of IDS) {
+    const element = document.getElementById(id);
+
+    /** @type {HTMLInputElement} */
+    const target = (event.target);
+    if (target.checked) {
       element.removeAttribute('disabled');
     } else {
       element.setAttribute('disabled', '');
@@ -29,11 +41,13 @@ function toggle(event) {
 
 document.getElementById('toggle').addEventListener('click', toggle);
 
-for (let announcerId of IDS.slice(0, 5)) {
+for (const announcerId of IDS.slice(0, 5)) {
   document.getElementById(announcerId).addEventListener('click', () => {
-    let options = document.getElementById('locale').children;
 
-    for (let option of options) {
+    /** @type {HTMLOptionsCollection} */
+    const options = (document.getElementById('locale').children);
+
+    for (const option of options) {
       if (option.value === 'zh_CN') {
         if (announcerId === 'Announcer_Global_Thresh') {
           // Removing the chinese option since it's not available
@@ -44,29 +58,33 @@ for (let announcerId of IDS.slice(0, 5)) {
     }
 
     // Restoring the Chinese option for other announcer types if it isn't there
-    let option = document.createElement('option');
+    const option = document.createElement('option');
     option.value = 'zh_CN';
     option.textContent = 'Chinese';
     document.getElementById('locale').appendChild(option);
   });
 }
 
-
+/** @param {Event} event */
 function save(event) {
-  let announcerToggle = document.getElementById('toggle').checked;
+  const announcerToggle = /** @type {HTMLInputElement} */ (document.
+    getElementById('toggle')).checked;
   utils.setToStorage(keys.ANNOUNCER, announcerToggle);
 
   if (announcerToggle) {
-    let announcerSelector = 'input[name="announcer"]:checked';
-    let announcerType = document.querySelector(announcerSelector).value;
+    const announcerSelector = 'input[name="announcer"]:checked';
+    const announcerType = /** @type {HTMLInputElement} */ (document.
+      querySelector(announcerSelector)).value;
+
     if (announcerType !== currentSettings.announcerType) {
-      currentSettings.announcer = announcerType;
+      currentSettings.announcerType = announcerType;
       currentSettings.changed = true;
 
       utils.setToStorage(keys.ANNOUNCER_TYPE, announcerType);
     }
 
-    let locale = document.getElementById('locale').value;
+    const locale = /** @type {HTMLInputElement} */ (document.
+      getElementById('locale')).value;
     if (locale !== currentSettings.locale) {
       currentSettings.locale = locale;
       currentSettings.changed = true;
@@ -96,6 +114,7 @@ function save(event) {
 document.querySelector('form').addEventListener('submit', save);
 
 async function setValues() {
+  /** @type {string | boolean} */
   let announcerToggle = await utils.getFromStorage(keys.ANNOUNCER);
   if (announcerToggle === 'None') {
     announcerToggle = false;
@@ -105,13 +124,15 @@ async function setValues() {
   if (announcerToggle) {
     document.getElementById('toggle').click();
 
-    let announcerType = await utils.getFromStorage(keys.ANNOUNCER_TYPE);
+    const announcerType = await utils.getFromStorage(keys.ANNOUNCER_TYPE);
     currentSettings.announcerType = announcerType;
-    document.getElementById(announcerType).checked = true;
+    /** @type {HTMLInputElement} */ (document.getElementById(announcerType)).
+      checked = true;
 
-    let locale = await utils.getFromStorage(keys.ANNOUNCER_LANG);
+    const locale = await utils.getFromStorage(keys.ANNOUNCER_LANG);
     currentSettings.locale = locale;
-    document.getElementById('locale').value = locale;
+    /** @type {HTMLInputElement} */ (document.getElementById('locale')).
+      value = locale;
   }
 }
 

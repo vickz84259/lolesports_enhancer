@@ -220,3 +220,4 @@ rules:
   no-unused-vars:
     - error
     - varsIgnorePattern: ^_$
+  prefer-const: error
