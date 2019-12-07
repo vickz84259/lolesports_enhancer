@@ -1,13 +1,13 @@
-import * as mutation from './mutation.js';
-import * as options from './stats/options.js';
-import { getFromStorage } from './utils.js';
-import { ANNOUNCER } from './keys.js';
-import { StatsInfo } from './stats/statsInfo.js';
+import * as mutation from '../DOM/mutation.js';
+import * as options from '../stats/options.js';
+import * as storage from '../storage/simple.js';
+import { ANNOUNCER } from '../storage/keys.js';
+import { StatsInfo } from '../stats/statsInfo.js';
 
 export { init, disconnect };
 
 
-/** @typedef {import('./link_state.js').TabStateDef} TabState */
+/** @typedef {import('../link_state.js').TabStateDef} TabState */
 
 /** @type {?StatsInfo} */
 let statsInfo = null;
@@ -253,7 +253,7 @@ function setUpStatsObserver(tabState) {
  * @param {TabState} tabState
  */
 async function init(tabState) {
-  const announcerState = await getFromStorage(ANNOUNCER);
+  const announcerState = await storage.get(ANNOUNCER);
   if (announcerState) {
     statsInfo = new StatsInfo();
     setUpStatsObserver(tabState);

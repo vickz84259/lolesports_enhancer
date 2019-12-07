@@ -1,7 +1,7 @@
 'use strict';
 
 import * as link_state from '../modules/link_state.js';
-import * as mutation from '../modules/mutation.js';
+import * as mutation from '../modules/DOM/mutation.js';
 
 /**
  * Function that does the actual UI changes to hide spoilers

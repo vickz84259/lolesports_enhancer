@@ -1,4 +1,7 @@
-export { getFromStorage, setToStorage };
+export {
+  getFromStorage as get,
+  setToStorage as set
+};
 
 /** @param {string} storageType */
 function assertStorageType(storageType) {

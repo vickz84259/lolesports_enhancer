@@ -1,7 +1,7 @@
-import * as storage from './storage.js';
-import * as keys from './keys.js';
-import { getFromStorage } from './utils.js';
-import { getJson } from './resources.js';
+import * as idb from './storage/indexedDB.js';
+import * as storage from './storage/simple.js';
+import * as keys from './storage/keys.js';
+import { getJson } from './utils/resources.js';
 
 const BASEURL = 'https://d3t82zuq6uoshl.cloudfront.net/';
 
@@ -46,15 +46,15 @@ async function* getFileNames(announcerType, locale) {
  * Downloads a file and saves it to disk in an indexedDB database
  *
  * @param {string} fileName - the file to be downloaded
- * @param {?import('./storage.js').IDBPDatabase} [db] - The indexedDB database
- *    if not provided, the default database will be used.
+ * @param {?idb.IDBPDatabase} [db] - The indexedDB database.
+ *    If not provided, the default database will be used.
  */
 async function download(fileName, db = null) {
   const url = `${BASEURL}${fileName}`;
   const audioFile = await (await fetch(url)).arrayBuffer();
 
-  if (!db) db = (await storage.getDB());
-  await storage.add(db, audioFile, fileName);
+  if (!db) db = (await idb.getDB());
+  await idb.add(db, audioFile, fileName);
 }
 
 
@@ -64,8 +64,8 @@ async function download(fileName, db = null) {
  *    storage
 */
 async function getAnnouncerSettings() {
-  const announcerType = await getFromStorage(keys.ANNOUNCER_TYPE);
-  const locale = await getFromStorage(keys.ANNOUNCER_LANG);
+  const announcerType = await storage.get(keys.ANNOUNCER_TYPE);
+  const locale = await storage.get(keys.ANNOUNCER_LANG);
 
   return { announcerType, locale };
 }
@@ -75,8 +75,8 @@ async function getAnnouncerSettings() {
  * Checks for any missing audio files and downloads them
  */
 export async function checkFiles() {
-  const db = await storage.getDB();
-  const savedFiles = await storage.getAllKeys(db);
+  const db = await idb.getDB();
+  const savedFiles = await idb.getAllKeys(db);
 
   /** @type {Promise[]} */
   const promises = [];
@@ -124,12 +124,12 @@ export async function getScenarios() {
  *  name and the audio data associated with it
  */
 export async function* getAudioFiles() {
-  const db = await storage.getDB();
+  const db = await idb.getDB();
 
   const settings = await getAnnouncerSettings();
   const fileNames = getFileNames(settings.announcerType, settings.locale);
   for await (const fileName of fileNames) {
-    const data = await storage.get(db, fileName);
+    const data = await idb.get(db, fileName);
     yield { fileName, data };
   }
 }

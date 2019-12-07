@@ -1,5 +1,5 @@
-import * as utils from '../modules/utils.js';
-import * as keys from '../modules/keys.js';
+import * as storage from '../modules/storage/simple.js';
+import * as keys from '../modules/storage/keys.js';
 
 /** @type {string[]} */
 const IDS = [
@@ -69,7 +69,7 @@ for (const announcerId of IDS.slice(0, 5)) {
 function save(event) {
   const announcerToggle = /** @type {HTMLInputElement} */ (document.
     getElementById('toggle')).checked;
-  utils.setToStorage(keys.ANNOUNCER, announcerToggle);
+  storage.set(keys.ANNOUNCER, announcerToggle);
 
   if (announcerToggle) {
     const announcerSelector = 'input[name="announcer"]:checked';
@@ -80,7 +80,7 @@ function save(event) {
       currentSettings.announcerType = announcerType;
       currentSettings.changed = true;
 
-      utils.setToStorage(keys.ANNOUNCER_TYPE, announcerType);
+      storage.set(keys.ANNOUNCER_TYPE, announcerType);
     }
 
     const locale = /** @type {HTMLInputElement} */ (document.
@@ -89,7 +89,7 @@ function save(event) {
       currentSettings.locale = locale;
       currentSettings.changed = true;
 
-      utils.setToStorage(keys.ANNOUNCER_LANG, locale);
+      storage.set(keys.ANNOUNCER_LANG, locale);
     }
 
     if (currentSettings.changed) {
@@ -115,21 +115,21 @@ document.querySelector('form').addEventListener('submit', save);
 
 async function setValues() {
   /** @type {string | boolean} */
-  let announcerToggle = await utils.getFromStorage(keys.ANNOUNCER);
+  let announcerToggle = await storage.get(keys.ANNOUNCER);
   if (announcerToggle === 'None') {
     announcerToggle = false;
-    utils.setToStorage(keys.ANNOUNCER, announcerToggle);
+    storage.set(keys.ANNOUNCER, announcerToggle);
   }
 
   if (announcerToggle) {
     document.getElementById('toggle').click();
 
-    const announcerType = await utils.getFromStorage(keys.ANNOUNCER_TYPE);
+    const announcerType = await storage.get(keys.ANNOUNCER_TYPE);
     currentSettings.announcerType = announcerType;
     /** @type {HTMLInputElement} */ (document.getElementById(announcerType)).
       checked = true;
 
-    const locale = await utils.getFromStorage(keys.ANNOUNCER_LANG);
+    const locale = await storage.get(keys.ANNOUNCER_LANG);
     currentSettings.locale = locale;
     /** @type {HTMLInputElement} */ (document.getElementById('locale')).
       value = locale;

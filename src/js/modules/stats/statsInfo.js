@@ -1,7 +1,7 @@
 import * as announcer from '../announcer.js';
-import { getFromStorage, setToStorage } from '../utils.js';
-import { getElementBySelector } from '../DOM_utils';
-import { ALLY_TEAMS } from '../keys.js';
+import * as storage from '../storage/simple.js';
+import { getElementBySelector } from '../DOM/utils.js';
+import { ALLY_TEAMS } from '../storage/keys.js';
 
 /**
  * Class to keep track of the in game stats
@@ -45,7 +45,7 @@ class BaseStats {
         this.allyTeams.unshift(team);
       }
 
-      setToStorage(ALLY_TEAMS, this.allyTeams);
+      storage.set(ALLY_TEAMS, this.allyTeams);
     }
   }
 
@@ -94,12 +94,12 @@ class BaseStats {
     /** @type {?string} */
     this._allyTeam = null;
 
-    const allyTeams = await getFromStorage(ALLY_TEAMS);
+    const allyTeams = await storage.get(ALLY_TEAMS);
     if (allyTeams === 'None') {
 
       /** @type {string[]} */
       this.allyTeams = [];
-      setToStorage(ALLY_TEAMS, this.allyTeams);
+      storage.set(ALLY_TEAMS, this.allyTeams);
     } else {
       this.allyTeams = allyTeams;
       for await (const teamName of getTeamNames()) {

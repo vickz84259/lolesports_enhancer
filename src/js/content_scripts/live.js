@@ -1,7 +1,7 @@
 'use strict';
 
 import * as link_state from '../modules/link_state.js';
-import * as stats from '../modules/stats.js';
+import * as stats from '../modules/stats/live.js';
 
 
 const link_regex = /^https:\/\/watch\.(?:\w+\.)?lolesports\.com\/live(?:\/\w+\/[a-zA-Z0-9_-]{11})?$/;

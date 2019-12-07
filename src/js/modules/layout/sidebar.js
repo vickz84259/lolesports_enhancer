@@ -1,9 +1,9 @@
-import * as mutation from '../mutation.js';
-import * as layout from './layout_utils.js';
-import { getElementBySelector, getElementById } from '../DOM_utils.js';
-import { getFromStorage, setToStorage } from '../utils.js';
-import { MAX_VIDEO_SIZE } from '../keys.js';
-import { getSVG } from '../resources.js';
+import * as mutation from '../DOM/mutation.js';
+import * as layout from './utils.js';
+import * as storage from '../storage/simple.js';
+import { getElementBySelector, getElementById } from '../DOM/utils.js';
+import { MAX_VIDEO_SIZE } from '../storage/keys.js';
+import { getSVG } from '../utils/resources.js';
 
 export { init };
 
@@ -42,7 +42,7 @@ async function getVideoPlayerWidth() {
 
 /** @returns {Promise<number>} */
 function getMaxVideoWidth() {
-  return getFromStorage(MAX_VIDEO_SIZE);
+  return storage.get(MAX_VIDEO_SIZE);
 }
 
 
@@ -213,7 +213,7 @@ async function getLayoutObserver() {
  * @param {import('../link_state.js').TabStateDef} tabState
  */
 async function init(tabState) {
-  const result = await getFromStorage(MAX_VIDEO_SIZE);
+  const result = await storage.get(MAX_VIDEO_SIZE);
   if (result === 'None') {
     // Setup the max video player size
     const currentLayout = await layout.getCurrent();
@@ -223,7 +223,7 @@ async function init(tabState) {
     /** @type {number} */
     let value = (notTheatre) ? (await getSideBarWidth()) : 0;
     value += (await getVideoPlayerWidth());
-    setToStorage(MAX_VIDEO_SIZE, value);
+    storage.set(MAX_VIDEO_SIZE, value);
   }
 
   const observer = await getLayoutObserver();

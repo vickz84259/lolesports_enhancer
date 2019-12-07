@@ -1,5 +1,5 @@
-import { getFromStorage, setToStorage } from '../utils.js';
-import { getElementBySelector } from '../DOM_utils.js';
+import * as storage from '../storage/simple.js';
+import { getElementBySelector } from '../DOM/utils.js';
 
 
 /* Creating an Enum to hold the various layout options.
@@ -41,7 +41,7 @@ async function getCurrentLayout(fromStorage = true) {
   if (!fromStorage) return _getCurrentLayout();
 
   /** @type {string} */
-  let layout = await getFromStorage('layout');
+  let layout = await storage.get('layout');
   if (layout === 'None') {
     layout = await _getCurrentLayout();
     setCurrentLayout(layout);
@@ -57,7 +57,7 @@ async function getCurrentLayout(fromStorage = true) {
  */
 function setCurrentLayout(layout) {
   if (Object.values(Layouts).includes(layout)) {
-    setToStorage('layout', layout);
+    storage.set('layout', layout);
   } else {
     throw new Error('Incorrect layout type given');
   }

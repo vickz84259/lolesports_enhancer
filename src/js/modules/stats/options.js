@@ -1,5 +1,5 @@
-import { getElementBySelector } from '../DOM_utils.js';
-import { getSVG } from '../resources.js';
+import { getElementBySelector } from '../DOM/utils.js';
+import { getSVG } from '../utils/resources.js';
 import { getTeamNames } from './statsInfo.js';
 
 
