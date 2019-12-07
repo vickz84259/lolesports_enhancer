@@ -1,15 +1,17 @@
+/** @type {Map<string, browser.runtime.Port>} */
 const PORTS = new Map();
 
 // Keeps track of the unique ids representing ports for each content script in
 // a particular tab
+/** @type {Map<number, string[]>} */
 const IDS_MAP = new Map();
 
 function main() {
   browser.runtime.onConnect.addListener(port => {
-    tabId = port.sender.tab.id;
+    const tabId = port.sender.tab.id;
 
-    let unique_id = `${tabId}_${port.name}`;
-    let value = IDS_MAP.has(tabId) ? IDS_MAP.get(tabId) : [];
+    const unique_id = `${tabId}_${port.name}`;
+    const value = IDS_MAP.has(tabId) ? IDS_MAP.get(tabId) : [];
     value.push(unique_id);
 
     IDS_MAP.set(tabId, value);
@@ -18,37 +20,57 @@ function main() {
 
   browser.tabs.onRemoved.addListener(tabId => {
     if (IDS_MAP.has(tabId)) {
-      let ids = IDS_MAP.get(tabId);
-      for (let id of ids) {
+      const ids = IDS_MAP.get(tabId);
+      for (const id of ids) {
         PORTS.delete(id);
       }
       IDS_MAP.delete(tabId);
     }
   });
 
-  /* beautify preserve:start */
   browser.webNavigation.onHistoryStateUpdated.addListener(
-    navigationListener,
-    {
-      url: [{
-        schemes: ['https'],
-        hostSuffix: 'watch.lolesports.com'
-      },
+      navigationListener,
       {
-        schemes: ['https'],
-        // This caters for the cases where there's another sub domain apart from
-        // watch. e.g. https://watch.euw.lolesports.com
-        hostContains: '.lolesports.com'
-      }]
-    }
+        url: [
+          {
+            schemes: ['https'],
+            hostSuffix: 'watch.lolesports.com'
+          },
+          {
+            schemes: ['https'],
+            // This caters for the cases where there's another sub domain apart
+            // from watch. e.g. https://watch.euw.lolesports.com
+            hostContains: '.lolesports.com'
+          }
+        ]
+      }
   );
-  /* beautify preserve:end */
 }
 
+/**
+ * Contains details about the navigation event.
+ * @typedef {Object} NavigationDetails
+ * @property {number} tabId - the ID of the tab in which the navigation is about
+ *    to occur.
+ * @property {string} url - The URL to which the given frame will navigate.
+ * @property {number} processId
+ * @property {number} frameId
+ * @property {number} timeStamp
+ * @property {browser.webNavigation.TransitionType} transitionType
+ * @property {browser.webNavigation.TransitionQualifier[]} transitionQualifiers
+ */
+
+/**
+ * Callback function to handle onHistoryStateUpdated events
+ * The function sends a message to every content script on the particular tab
+ * where the link has changed.
+ *
+ * @param {NavigationDetails} details
+ */
 function navigationListener(details) {
-  let ids = IDS_MAP.get(details.tabId);
-  for (let id of ids) {
-    let port = PORTS.get(id);
+  const ids = IDS_MAP.get(details.tabId);
+  for (const id of ids) {
+    const port = PORTS.get(id);
     port.postMessage({ url: details.url });
   }
 }

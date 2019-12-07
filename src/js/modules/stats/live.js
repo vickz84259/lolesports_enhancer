@@ -1,16 +1,21 @@
-import * as mutation from './mutation.js';
-import * as options from './stats/options.js';
-import { getFromStorage } from './utils.js';
-import { ANNOUNCER } from './keys.js';
-import { StatsInfo } from './stats/statsInfo.js';
+import * as mutation from '../DOM/mutation.js';
+import * as options from '../stats/options.js';
+import * as storage from '../storage/simple.js';
+import { ANNOUNCER } from '../storage/keys.js';
+import { StatsInfo } from '../stats/statsInfo.js';
 
 export { init, disconnect };
 
 
-let statsInfo;
+/** @typedef {import('../link_state.js').TabStateDef} TabState */
 
+/** @type {?StatsInfo} */
+let statsInfo = null;
+
+
+/** @param {*} event */
 function videoInfoHandler(event) {
-  let eventData = JSON.parse(event.data);
+  const eventData = JSON.parse(event.data);
   if (eventData.event === 'infoDelivery' && 'currentTime' in eventData.info) {
     if (!statsInfo.isYouTube) statsInfo.isYouTube = true;
     statsInfo.logTime(eventData.info.currentTime);
@@ -18,33 +23,40 @@ function videoInfoHandler(event) {
 }
 
 
+/**
+ * @param {Element} playerElement
+ *
+ * @returns {MutationObserver}
+ */
 function getKDAObserver(playerElement) {
+  const team = (playerElement.parentElement.className === 'blue-team') ?
+    'blue' : 'red';
+  const enemyTeam = (team === 'blue') ? 'red' : 'blue';
+
+  const playerName = playerElement.firstElementChild.textContent;
+
+  /** @type {number} */
   let consecutiveKills = 0;
-  let team = (playerElement.parentElement.className === 'blue-team') ? 'blue' : 'red';
-  let enemyTeam = (team === 'blue') ? 'red' : 'blue';
-
-  let playerName = playerElement.firstElementChild.textContent;
+  /** @type {number} */
   let lastKill = 0;
-
+  /** @type {number} */
   let multiKill = 0;
+  /** @type {number} */
   let totalKills = 0;
 
-  let observer = new MutationObserver((mutationRecords) => {
-    let type = mutationRecords[0].target.parentElement.className;
+  const observer = new MutationObserver(mutationRecords => {
+    const type = mutationRecords[0].target.parentElement.className;
     if (type === 'deaths') {
       consecutiveKills = 0;
     } else {
       if (statsInfo.canAnnounce()) {
-        let condition = (statsInfo.allyTeam && playerName.includes(statsInfo.allyTeam));
-        let isAlly = (condition) ? true : false;
-
-        let currentTime = Date.now();
-        let timeDiff = (currentTime - lastKill) / 1000;
+        const currentTime = Date.now();
+        const timeDiff = (currentTime - lastKill) / 1000;
         lastKill = currentTime;
 
-        let newValue = Number(mutationRecords[0].target.nodeValue);
-        let oldValue = Number(mutationRecords[0].oldValue);
-        let kills = newValue - oldValue;
+        const newValue = Number(mutationRecords[0].target.nodeValue);
+        const oldValue = Number(mutationRecords[0].oldValue);
+        const kills = newValue - oldValue;
 
         if (kills >= 1) {
           if (totalKills === 0) {
@@ -59,6 +71,10 @@ function getKDAObserver(playerElement) {
           totalKills = newValue;
           consecutiveKills += kills;
 
+          const enemyAce = (enemyTeam === 'blue') ?
+            statsInfo.blueAce : statsInfo.redAce;
+
+          /** @type {string} */
           let scenarioType = '';
           switch (multiKill) {
             case 1:
@@ -97,10 +113,12 @@ function getKDAObserver(playerElement) {
               scenarioType = 'quadra';
               break;
             case 5:
-              let enemyAce = (enemyTeam === 'blue') ? statsInfo.blueAce : statsInfo.redAce;
               if (timeDiff <= 30.0 && enemyAce) {
                 scenarioType = 'penta';
               }
+              break;
+            default:
+              console.log('unknown scenario');
               break;
           }
           if (statsInfo.totalKills === 0) {
@@ -108,7 +126,7 @@ function getKDAObserver(playerElement) {
           }
 
           if (statsInfo.allyTeam) {
-            if (isAlly) {
+            if (playerName.includes(statsInfo.allyTeam)) {
               if (scenarioType === 'ally') {
                 scenarioType = 'enemy';
               } else {
@@ -129,22 +147,32 @@ function getKDAObserver(playerElement) {
     }
   });
 
-  let config = { characterData: true, characterDataOldValue: true };
-  let killsElement = playerElement.querySelector('.details .stat.kda .kills');
+  const config = { characterData: true, characterDataOldValue: true };
+  const killsElement = playerElement.querySelector('.details .stat.kda .kills');
   observer.observe(killsElement.childNodes[0], config);
 
-  let deathsElement = playerElement.querySelector('.details .stat.kda .deaths');
+  const deathsElement = playerElement.
+    querySelector('.details .stat.kda .deaths');
   observer.observe(deathsElement.childNodes[0], config);
 
   return observer;
 }
 
-function getDeathObserver(playerElement) {
-  let isDead = false;
-  let team = (playerElement.parentElement.className === 'blue-team') ? 'blue' : 'red';
 
-  let observer = new MutationObserver((mutationRecords) => {
-    let target = mutationRecords[0].target;
+/**
+ * @param {Element} playerElement
+ *
+ * @returns {MutationObserver}
+ */
+function getDeathObserver(playerElement) {
+  /** @type {boolean} */
+  let isDead = false;
+  const team = (playerElement.parentElement.className === 'blue-team') ?
+    'blue' : 'red';
+
+  const observer = new MutationObserver(mutationRecords => {
+    /** @type {Element} */
+    const target = (mutationRecords[0].target);
     if (target.classList.contains('dead') && !isDead) {
       isDead = true;
       statsInfo.updateDeaths(team, isDead);
@@ -159,24 +187,32 @@ function getDeathObserver(playerElement) {
 }
 
 
-async function setUpStatsObserver(tabState) {
-  // This observer checks if the team stats div has been added
+/**
+ * The stats observer checks whether the team stats div has been added
+ *
+ * @param {TabState} tabState
+ */
+function setUpStatsObserver(tabState) {
+  /** @type {MutationObserver[]} */
   let observers = [];
+  /** @type {boolean} */
   let hasAddedObservers = false;
 
-  let addedObserver = new MutationObserver((records) => {
-    for (let element of mutation.addedRecordsIterator(records, 'StatsTeamsPlayers')) {
+  const addedObserver = new MutationObserver(records => {
+    const elements = mutation.
+      addedRecordsIterator(records, 'StatsTeamsPlayers');
+    for (const element of elements) {
       if (hasAddedObservers) break;
       hasAddedObservers = true;
 
-      for (let statsTeam of element.children) {
+      for (const statsTeam of element.children) {
 
-        let className = statsTeam.className;
+        const className = statsTeam.className;
         if (className === 'blue-team' || className === 'red-team') {
 
-          for (let player of statsTeam.children) {
-            let kdaObserver = getKDAObserver(player);
-            let deathObserver = getDeathObserver(player);
+          for (const player of statsTeam.children) {
+            const kdaObserver = getKDAObserver(player);
+            const deathObserver = getDeathObserver(player);
 
             observers.push(kdaObserver, deathObserver);
 
@@ -188,11 +224,13 @@ async function setUpStatsObserver(tabState) {
     }
   });
 
-  let removedObserver = new MutationObserver((records) => {
-    for (let _ of mutation.removedRecordsIterator(records, 'StatsTeamsPlayers')) {
+  const removedObserver = new MutationObserver(records => {
+    const removed = mutation.
+      removedRecordsIterator(records, 'StatsTeamsPlayers');
+    for (const _ of removed) {
       hasAddedObservers = false;
 
-      for (let observer of observers) {
+      for (const observer of observers) {
         observer.disconnect();
       }
       observers = [];
@@ -201,7 +239,7 @@ async function setUpStatsObserver(tabState) {
     }
   });
 
-  let config = { childList: true, subtree: true };
+  const config = { childList: true, subtree: true };
   addedObserver.observe(document.body, config);
   removedObserver.observe(document.body, config);
 
@@ -209,8 +247,13 @@ async function setUpStatsObserver(tabState) {
   tabState.addObserver(removedObserver);
 }
 
+/**
+ * The initialisation function
+ *
+ * @param {TabState} tabState
+ */
 async function init(tabState) {
-  let announcerState = await getFromStorage(ANNOUNCER);
+  const announcerState = await storage.get(ANNOUNCER);
   if (announcerState) {
     statsInfo = new StatsInfo();
     setUpStatsObserver(tabState);
