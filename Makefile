@@ -22,7 +22,7 @@ $(dest_dirs):
 	mkdir -p $@
 
 javascript:
-	@rollup -c
+	@npx rollup -c
 
 clean:
 	rm $(build_dir)/* -r
