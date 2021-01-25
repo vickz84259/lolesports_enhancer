@@ -1,4 +1,4 @@
-import resolve from 'rollup-plugin-node-resolve';
+import { nodeResolve } from '@rollup/plugin-node-resolve';
 import cleanup from 'rollup-plugin-cleanup';
 import { eslint } from 'rollup-plugin-eslint';
 
@@ -24,7 +24,7 @@ export default files.map(file => ({
   },
   plugins: [
     eslint({ throwOnError: true }),
-    resolve({ customResolveOptions: { moduleDirectory: 'node_modules' } }),
+    nodeResolve(),
     cleanup({ comments: 'none' })
   ]
 }));
