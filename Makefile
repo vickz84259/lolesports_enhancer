@@ -10,8 +10,8 @@ src_files := $(src_dir)/manifest.json $(foreach dir, $(src_dirs), $(wildcard $(d
 files := $(foreach file, $(src_files), $(subst $(src_dir)/,, $(file)))
 dest_files := $(foreach file, $(files), $(addprefix $(build_dir)/, $(file)))
 
-.PHONY: all static javascript clean
-all: static javascript
+.PHONY: all static javascript build clean clean_install clean_build
+all: build
 
 static: $(dest_files)
 
@@ -26,3 +26,10 @@ javascript:
 
 clean:
 	rm $(build_dir)/* -r
+
+build: static javascript
+
+clean_install: package-lock.json
+	npm ci
+
+clean_build: clean_install clean build
