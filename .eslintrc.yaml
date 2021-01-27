@@ -4,6 +4,11 @@ env:
   browser: true
   webextensions: true
 
+parser: '@typescript-eslint/parser'
+
+plugins:
+  - '@typescript-eslint'
+
 parserOptions:
   ecmaVersion: 2019
   sourceType: module
