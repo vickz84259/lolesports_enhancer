@@ -1,0 +1,12 @@
+{
+    "compilerOptions": {
+        "allowJs": true,
+        "target": "ES2019",
+        "lib": ["DOM", "ES2019"],
+        "module": "ES2020",
+        "removeComments": true,
+        "strict": true,
+        "types": ["web-ext-types"],
+        "noEmitOnError": false,
+    }
+}
