@@ -9,13 +9,19 @@ src_files := $(src_dir)/manifest.json $(foreach dir, $(src_dirs), $(wildcard $(d
 dest_files := $(foreach file, $(src_files), $(subst $(src_dir)/, $(build_dir)/, $(file)))
 
 js_modules_dir := $(src_dir)/js/modules
-js_modules := $(wildcard $(js_modules_dir)/*.js) $(wildcard $(js_modules_dir)/**/*.js)
+js_modules := $(wildcard $(js_modules_dir)/*) $(wildcard $(js_modules_dir)/**/*)
 
 js_directories := background_scripts content_scripts internal
 src_js_dirs := $(foreach dir, $(js_directories), $(addprefix $(src_dir)/js/, $(dir)))
-src_js_files := $(foreach dir, $(src_js_dirs), $(wildcard $(dir)/*))
+
+src_js_files := $(foreach dir, $(src_js_dirs), $(wildcard $(dir)/*.js))
+src_ts_files := $(foreach dir, $(src_js_dirs), $(wildcard $(dir)/*.ts))
 
 dest_js_files := $(foreach file, $(src_js_files), $(subst $(src_dir)/, $(build_dir)/, $(file)))
+
+temp_ts_files := $(foreach file, $(src_ts_files), $(subst $(src_dir)/, $(build_dir)/, $(file)))
+dest_ts_files := $(foreach file, $(temp_ts_files), $(subst .ts,.js, $(file)))
+
 
 zip_name := LoLEsportsEnhancer.zip
 
@@ -31,13 +37,21 @@ $(dest_files): $(build_dir)/%: $(src_dir)/% | $(dest_dirs)
 
 static: $(dest_files)
 
-$(dest_js_files): $(build_dir)/%: $(src_dir)/% $(js_modules)
-	@npx rollup -i $< -o $@ -f iife \
+$(dest_ts_files) $(dest_js_files): $(js_modules)
+
+$(dest_ts_files): $(build_dir)/%.js: $(src_dir)/%.ts
+	@npx rollup -i $< -d $(dir $@) -f iife \
 	-p "eslint={throwOnError:true}" \
 	-p node-resolve \
-	-p "cleanup={comments:'none'}"
+	-p "typescript={outDir: \"$(dir $@)/temp\"}" \
 
-scripts: $(dest_js_files)
+$(dest_js_files): $(build_dir)/%: $(src_dir)/%
+	@npx rollup -i $< -d $(dir $@) -f iife \
+	-p "eslint={throwOnError:true}" \
+	-p node-resolve \
+	-p "typescript={outDir: \"$(dir $@)/temp\"}" \
+
+scripts: $(dest_js_files) $(dest_ts_files)
 
 $(zip_name): static scripts
 	@cd $(build_dir) && zip -ruq $@ .
