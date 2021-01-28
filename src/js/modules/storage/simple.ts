@@ -3,8 +3,10 @@ export {
   setToStorage as set
 };
 
-/** @param {string} storageType */
-function assertStorageType(storageType) {
+type StorageType = browser.storage.StorageName
+type StorageValue = browser.storage.StorageValue
+
+function assertStorageType(storageType: string): void {
   const storageTypes = ['local', 'sync', 'managed'];
   if (!storageTypes.includes(storageType)) {
     throw new Error('Wrong storage type');
@@ -15,18 +17,18 @@ function assertStorageType(storageType) {
  *
  * @param {string} key
  * @param {string} [defaultValue] - The value to return if the key is not found
- * @param {string} [storageType="local"]
+ * @param {StorageType} [storageType="local"]
  *
  * @returns {Promise} The value that was retrieved from storage
  */
 async function getFromStorage(
-    key,
+    key: string,
     defaultValue = 'None',
-    storageType = 'local'
-) {
+    storageType: StorageType = 'local'
+): Promise<StorageValue> {
+
   assertStorageType(storageType);
 
-  /** @type {Object<string, (string | array | object)>} */
   const result = await browser.storage[storageType].
     get({ [key]: defaultValue });
   return result[key];
@@ -34,11 +36,16 @@ async function getFromStorage(
 
 /**
  * @param {string} key
- * @param {(string | Array | Object)} value - value is converted to JSON
+ * @param {StorageValue} value - value is converted to JSON
  *    internally
- * @param {string} [storageType="local"]
+ * @param {StorageType} [storageType="local"]
  */
-function setToStorage(key, value, storageType = 'local') {
+function setToStorage(
+    key: string,
+    value: StorageValue,
+    storageType: StorageType = 'local'
+): void {
+
   assertStorageType(storageType);
   browser.storage[storageType].set({ [key]: value });
 }

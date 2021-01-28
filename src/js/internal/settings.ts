@@ -1,7 +1,6 @@
-import * as storage from '../modules/storage/simple.js';
-import * as keys from '../modules/storage/keys.js';
+import * as storage from '../modules/storage/simple';
+import * as keys from '../modules/storage/keys';
 
-/** @type {string[]} */
 const IDS = [
   'Announcer_Global_Ahri',
   'Announcer_Global_Female1',
@@ -11,26 +10,21 @@ const IDS = [
   'locale'
 ];
 
-/** @type {{changed: boolean, announcerType: string, locale: string}} */
 const currentSettings = {
   changed: false,
   announcerType: '',
   locale: '',
 };
 
-
 /**
  * Enables/disables the various form elements based on whether the user enables/
  * disables the announcer settings.
- *
- * @param {MouseEvent} event
  */
-function toggle(event) {
+function toggle(event: MouseEvent): void {
   for (const id of IDS) {
-    const element = document.getElementById(id);
+    const element = document.getElementById(id)!;
 
-    /** @type {HTMLInputElement} */
-    const target = (event.target);
+    const target = event.target as HTMLInputElement;
     if (target.checked) {
       element.removeAttribute('disabled');
     } else {
@@ -39,15 +33,14 @@ function toggle(event) {
   }
 }
 
-document.getElementById('toggle').addEventListener('click', toggle);
+document.getElementById('toggle')!.addEventListener('click', toggle);
 
 for (const announcerId of IDS.slice(0, 5)) {
-  document.getElementById(announcerId).addEventListener('click', () => {
+  document.getElementById(announcerId)!.addEventListener('click', () => {
 
-    /** @type {HTMLOptionsCollection} */
-    const options = (document.getElementById('locale').children);
+    const options = document.getElementById('locale')!.children;
 
-    for (const option of options) {
+    for (const option of Array.from(options as HTMLOptionsCollection)) {
       if (option.value === 'zh_CN') {
         if (announcerId === 'Announcer_Global_Thresh') {
           // Removing the chinese option since it's not available
@@ -61,20 +54,20 @@ for (const announcerId of IDS.slice(0, 5)) {
     const option = document.createElement('option');
     option.value = 'zh_CN';
     option.textContent = 'Chinese';
-    document.getElementById('locale').appendChild(option);
+    document.getElementById('locale')!.appendChild(option);
   });
 }
 
-/** @param {Event} event */
-function save(event) {
-  const announcerToggle = /** @type {HTMLInputElement} */ (document.
-    getElementById('toggle')).checked;
+
+function save(event: Event): void {
+  const announcerToggle = (document.
+    getElementById('toggle') as HTMLInputElement).checked;
   storage.set(keys.ANNOUNCER, announcerToggle);
 
   if (announcerToggle) {
     const announcerSelector = 'input[name="announcer"]:checked';
-    const announcerType = /** @type {HTMLInputElement} */ (document.
-      querySelector(announcerSelector)).value;
+    const announcerType = (document.
+      querySelector(announcerSelector) as HTMLInputElement).value;
 
     if (announcerType !== currentSettings.announcerType) {
       currentSettings.announcerType = announcerType;
@@ -83,8 +76,8 @@ function save(event) {
       storage.set(keys.ANNOUNCER_TYPE, announcerType);
     }
 
-    const locale = /** @type {HTMLInputElement} */ (document.
-      getElementById('locale')).value;
+    const locale = (document.
+      getElementById('locale') as HTMLInputElement).value;
     if (locale !== currentSettings.locale) {
       currentSettings.locale = locale;
       currentSettings.changed = true;
@@ -111,28 +104,25 @@ function save(event) {
   event.preventDefault();
 }
 
-document.querySelector('form').addEventListener('submit', save);
+document.querySelector('form')!.addEventListener('submit', save);
 
 async function setValues() {
-  /** @type {string | boolean} */
-  let announcerToggle = await storage.get(keys.ANNOUNCER);
+  let announcerToggle = (await storage.get(keys.ANNOUNCER)) as string | boolean;
   if (announcerToggle === 'None') {
     announcerToggle = false;
     storage.set(keys.ANNOUNCER, announcerToggle);
   }
 
   if (announcerToggle) {
-    document.getElementById('toggle').click();
+    document.getElementById('toggle')!.click();
 
-    const announcerType = await storage.get(keys.ANNOUNCER_TYPE);
+    const announcerType = (await storage.get(keys.ANNOUNCER_TYPE)) as string;
     currentSettings.announcerType = announcerType;
-    /** @type {HTMLInputElement} */ (document.getElementById(announcerType)).
-      checked = true;
+    (document.getElementById(announcerType) as HTMLInputElement).checked = true;
 
-    const locale = await storage.get(keys.ANNOUNCER_LANG);
+    const locale = (await storage.get(keys.ANNOUNCER_LANG)) as string;
     currentSettings.locale = locale;
-    /** @type {HTMLInputElement} */ (document.getElementById('locale')).
-      value = locale;
+    (document.getElementById('locale') as HTMLInputElement).value = locale;
   }
 }
 
