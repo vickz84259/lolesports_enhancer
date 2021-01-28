@@ -40,7 +40,7 @@ for (const announcerId of IDS.slice(0, 5)) {
 
     const options = document.getElementById('locale')!.children;
 
-    for (const option of Array.from(options as HTMLOptionsCollection)) {
+    for (const option of (options as HTMLOptionsCollection)) {
       if (option.value === 'zh_CN') {
         if (announcerId === 'Announcer_Global_Thresh') {
           // Removing the chinese option since it's not available
