@@ -1,4 +1,6 @@
 ---
+root: true
+
 env:
   es6: true
   browser: true
@@ -17,6 +19,9 @@ parserOptions:
 
 globals:
   DOMPurify: readonly
+
+ignorePatterns:
+  - 'src/js/external/*'
 
 extends: eslint:recommended
 
