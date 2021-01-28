@@ -1,19 +1,15 @@
-import * as idb from './storage/indexedDB.js';
-import * as storage from './storage/simple.js';
-import * as keys from './storage/keys.js';
-import { getJson } from './utils/resources.js';
+import * as idb from './storage/indexedDB';
+import * as storage from './storage/simple';
+import * as keys from './storage/keys';
+import { getJson } from './utils/resources';
 
 const BASEURL = 'https://d3t82zuq6uoshl.cloudfront.net/';
 
 
 /**
  * Pads a fileName with the appropriate number of zeros
- *
- * @param {number} fileNumber
- *
- * @returns {string} file name with the padded file number
  */
-function getPaddedFileName(fileNumber) {
+function getPaddedFileName(fileNumber: number) {
   const padded = fileNumber.toString().padStart(4, '0');
   return `File${padded}.mp3`;
 }
@@ -23,18 +19,16 @@ function getPaddedFileName(fileNumber) {
  * Async Generator that gets all the filenames for a particular announcer type
  * in a particular locale.
  *
- * @param {string} announcerType - The name of the announcer
- * @param {string} locale - the announcer language locale
+ * @param announcerType - The name of the announcer
+ * @param locale - the announcer language locale
  *
- * @returns {AsyncGenerator<string, void, unknown>}
- * @yields {string} - a file name
+ * @yields - a file name
  */
-async function* getFileNames(announcerType, locale) {
+async function* getFileNames(announcerType: string, locale: string) {
   const response = await getJson(`json/${announcerType}.json`);
   const fileNumbers = Object.values(response.categories);
 
-  /** @type {Set<number>} */
-  const fileNoSet = new Set([].concat(...fileNumbers));
+  const fileNoSet = new Set(([] as number[]).concat(...fileNumbers));
   for (const num of fileNoSet) {
     const fileName = getPaddedFileName(num);
     yield `${announcerType}/${locale}/${fileName}`;
@@ -45,11 +39,11 @@ async function* getFileNames(announcerType, locale) {
 /**
  * Downloads a file and saves it to disk in an indexedDB database
  *
- * @param {string} fileName - the file to be downloaded
- * @param {?idb.IDBPDatabase} [db] - The indexedDB database.
+ * @param fileName - the file to be downloaded
+ * @param [db] - The indexedDB database.
  *    If not provided, the default database will be used.
  */
-async function download(fileName, db = null) {
+async function download(fileName: string, db?: idb.Database) {
   const url = `${BASEURL}${fileName}`;
   const audioFile = await (await fetch(url)).arrayBuffer();
 
@@ -59,13 +53,12 @@ async function download(fileName, db = null) {
 
 
 /**
- * @returns {Promise<{announcerType: string, locale: string}>} Promise
- *    containing the announcerType and the locale from the values stored in
- *    storage
+ * @returns  Promise containing the announcerType and the locale from the
+ *    values stored in storage
 */
 async function getAnnouncerSettings() {
-  const announcerType = await storage.get(keys.ANNOUNCER_TYPE);
-  const locale = await storage.get(keys.ANNOUNCER_LANG);
+  const announcerType = await storage.get(keys.ANNOUNCER_TYPE) as string;
+  const locale = await storage.get(keys.ANNOUNCER_LANG) as string;
 
   return { announcerType, locale };
 }
@@ -78,8 +71,7 @@ export async function checkFiles() {
   const db = await idb.getDB();
   const savedFiles = await idb.getAllKeys(db);
 
-  /** @type {Promise[]} */
-  const promises = [];
+  const promises: Promise<void>[] = [];
 
   const settings = await getAnnouncerSettings();
   const fileNames = getFileNames(settings.announcerType, settings.locale);
@@ -95,33 +87,37 @@ export async function checkFiles() {
 
 
 /**
+ * specifies the various announcer scenarios and the file names for each
+ * particular scenario
+ */
+interface AnnouncerScenarioFiles {
+  [key: string]: string[]
+}
+
+
+/**
  * Retrieves the announcer's scenarios from the respective json resource file
- *
- * @returns {Promise<Object.<string, string[]>>}
  */
 export async function getScenarios() {
   const settings = await getAnnouncerSettings();
   const response = await getJson(`json/${settings.announcerType}.json`);
 
-  /** @type {Object.<string, (string | number)[]>} */
   const scenarios = response.categories;
+  const named_scenarios: AnnouncerScenarioFiles = {};
 
   for (const key in scenarios) {
-    scenarios[key] = scenarios[key].map(/** @param {number} item */item => {
+    named_scenarios[key] = scenarios[key].map(item => {
       const fileName = getPaddedFileName(item);
       return `${settings.announcerType}/${settings.locale}/${fileName}`;
     });
   }
-  return /** @type {Object.<string, string[]>} */ (scenarios);
+  return named_scenarios;
 }
 
 /**
  * Retrieves the audio files saved on disk based on the current user settings.
  *
- * @returns {AsyncGenerator<{fileName: string, data: ArrayBuffer}, void,
- *    unknown>}
- * @yields {{fileName: string, data: ArrayBuffer}} Object containing the file
- *  name and the audio data associated with it
+ * @yields Object containing the file name and the audio data associated with it
  */
 export async function* getAudioFiles() {
   const db = await idb.getDB();
