@@ -29,6 +29,9 @@ zip_name := LoLEsportsEnhancer.zip
 .PHONY: all static scripts build clean clean_install clean_build
 all: build
 
+lint: $(js_modules) $(src_js_files) $(src_ts_files)
+	@npx eslint $(src_js_dirs) $(js_modules_dir) --ext .js --ext .ts --cache
+
 $(dest_dirs):
 	mkdir -p $@
 
@@ -41,19 +44,17 @@ $(dest_ts_files) $(dest_js_files): $(js_modules)
 
 $(dest_ts_files): $(build_dir)/%.js: $(src_dir)/%.ts
 	@npx rollup -i $< -d $(dir $@) -f iife \
-	-p "eslint={throwOnError:true}" \
+	-p typescript \
 	-p node-resolve \
-	-p "typescript={outDir: \"$(dir $@)/temp\"}" \
 
 $(dest_js_files): $(build_dir)/%: $(src_dir)/%
 	@npx rollup -i $< -d $(dir $@) -f iife \
-	-p "eslint={throwOnError:true}" \
+	-p typescript \
 	-p node-resolve \
-	-p "typescript={outDir: \"$(dir $@)/temp\"}" \
 
 scripts: $(dest_js_files) $(dest_ts_files)
 
-$(zip_name): static scripts
+$(zip_name): lint static scripts
 	@cd $(build_dir) && zip -ruq $@ .
 
 build: $(zip_name)
