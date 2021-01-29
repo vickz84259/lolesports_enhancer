@@ -90,7 +90,7 @@ export async function checkFiles() {
  * specifies the various announcer scenarios and the file names for each
  * particular scenario
  */
-interface AnnouncerScenarioFiles {
+export interface AnnouncerScenarioFiles {
   [key: string]: string[]
 }
 

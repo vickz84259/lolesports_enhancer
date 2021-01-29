@@ -1,22 +1,26 @@
-import * as announcer from '../announcer.js';
-import * as storage from '../storage/simple.js';
-import { getElementBySelector } from '../DOM/utils.js';
-import { ALLY_TEAMS } from '../storage/keys.js';
+import * as announcer from '../announcer';
+import * as storage from '../storage/simple';
+import { getElementBySelector } from '../DOM/utils';
+import { ALLY_TEAMS } from '../storage/keys';
+
 
 /**
  * Class to keep track of the in game stats
  * @todo Rename this class and the file in general
  */
 class BaseStats {
+  private readonly audioContext: AudioContext;
+  private readonly audioFiles: Map<string, ArrayBuffer>;
+  private readonly audioBuffers: Map<string, AudioBuffer>;
+
+  private _allyTeam: string = '';
+  private allyTeams: string[] = [];
+
+  private scenarios!: announcer.AnnouncerScenarioFiles;
 
   constructor() {
-    /** @private @const @type {AudioContext}*/
     this.audioContext = new AudioContext();
-
-    /** @private @const @type {Map<string, ArrayBuffer>} */
     this.audioFiles = new Map();
-
-    /** @private @const @type {Map<string, AudioBuffer>} */
     this.audioBuffers = new Map();
 
     this.loadAudioFiles();
@@ -25,13 +29,11 @@ class BaseStats {
     this.reset();
   }
 
-  /** @returns {string} */
   get allyTeam() {
     return this._allyTeam;
   }
 
-  /** @param {string} team */
-  set allyTeam(team) {
+  set allyTeam(team: string) {
     this._allyTeam = team;
 
     if (team) {
@@ -54,28 +56,25 @@ class BaseStats {
     await announcer.checkFiles();
 
     for await (const audioObj of announcer.getAudioFiles()) {
-      this.audioFiles.set(audioObj.fileName, audioObj.data);
+      this.audioFiles.set(audioObj.fileName, audioObj.data!);
     }
   }
 
   async loadScenarios() {
-    /** @type {Object.<string, string[]>} */
     this.scenarios = await announcer.getScenarios();
   }
 
-  /** @param {string} scenarioType */
-  async playAudio(scenarioType) {
+  async playAudio(scenarioType: string) {
     const source = this.audioContext.createBufferSource();
 
     const scenarios = this.scenarios[scenarioType];
     const fileName = scenarios[Math.floor(Math.random() * scenarios.length)];
 
-    /** @type {?AudioBuffer} */
-    let audioBuffer = null;
+    let audioBuffer: AudioBuffer | null = null;
     if (this.audioBuffers.has(fileName)) {
-      audioBuffer = this.audioBuffers.get(fileName);
+      audioBuffer = this.audioBuffers.get(fileName)!;
     } else {
-      const audioFile = this.audioFiles.get(fileName);
+      const audioFile = this.audioFiles.get(fileName)!;
       audioBuffer = await this.audioContext.decodeAudioData(audioFile);
     }
 
@@ -90,18 +89,13 @@ class BaseStats {
   }
 
   async reset() {
-    // setting allyTeam
-    /** @type {?string} */
-    this._allyTeam = null;
-
     const allyTeams = await storage.get(ALLY_TEAMS);
     if (allyTeams === 'None') {
-
-      /** @type {string[]} */
       this.allyTeams = [];
       storage.set(ALLY_TEAMS, this.allyTeams);
+
     } else {
-      this.allyTeams = allyTeams;
+      this.allyTeams = allyTeams as string[];
       for await (const teamName of getTeamNames()) {
         if (this.allyTeams.includes(teamName)) {
           this._allyTeam = teamName;
@@ -112,21 +106,24 @@ class BaseStats {
   }
 }
 
-/**
- * @extends BaseStats
- */
+
 export class StatsInfo extends BaseStats {
+  private previousTime: number; // Deprecated
+  private timeLog: number[]; // Deprecated
+  isYouTube: boolean; // Deprecated
+
+  private blueDead!: number;
+  private redDead!: number;
+  totalKills!: number;
+
+  blueAce!: boolean;
+  redAce!: boolean;
 
   constructor() {
     super();
 
-    /** @private @deprecated @type {number} */
     this.previousTime = 0;
-
-    /** @private @deprecated @type {boolean} */
     this.isYouTube = false;
-
-    /** @private @deprecated @type {number[]} */
     this.timeLog = [];
 
     this.reset(true);
@@ -134,10 +131,8 @@ export class StatsInfo extends BaseStats {
 
   /**
    * @deprecated
-   *
-   * @param {number} currentTime
    */
-  logTime(currentTime) {
+  logTime(currentTime: number) {
     currentTime = Math.floor(currentTime * 10) / 10;
     if ((currentTime - this.previousTime) >= 2.5) {
       this.previousTime = currentTime;
@@ -149,8 +144,6 @@ export class StatsInfo extends BaseStats {
 
   /**
    * @deprecated
-   *
-   * @returns {boolean}
    */
   canAnnounce() {
     if (this.isYouTube) {
@@ -164,12 +157,7 @@ export class StatsInfo extends BaseStats {
     return true;
   }
 
-  /**
-   *
-   * @param {string} team
-   * @param {boolean} dead
-   */
-  updateDeaths(team, dead) {
+  updateDeaths(team: string, dead: boolean) {
     if (dead) {
       if (team === 'blue') {
         this.blueDead += 1;
@@ -196,11 +184,9 @@ export class StatsInfo extends BaseStats {
   }
 
   /**
-   * @param {boolean} [init=false] - Determines whether this function is being
+   * @param [init=false] - Determines whether this function is being
    *    called as part of the initialisation process or not.
    * @override
-   *
-   * @returns {Promise<void>}
    */
   async reset(init = false) {
     if (!init) await super.reset();
@@ -217,15 +203,13 @@ export class StatsInfo extends BaseStats {
 
 /**
  * Retrieves the names of the teams currently playing
- *
- * @returns {AsyncGenerator<string, any, unknown>}
- * @yields {string} the name of a team
+ * @yields the name of a team
  */
 export async function* getTeamNames() {
   const teams = await getElementBySelector('.match .teams');
   for (const element of teams.children) {
     if (element.className === 'team') {
-      yield element.firstChild.textContent;
+      yield element.firstChild!.textContent!;
     }
   }
 }
