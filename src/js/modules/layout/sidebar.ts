@@ -1,24 +1,21 @@
-import * as mutation from '../DOM/mutation.js';
-import * as layout from './utils.js';
-import * as storage from '../storage/simple.js';
-import { getElementBySelector, getElementById } from '../DOM/utils.js';
-import { MAX_VIDEO_SIZE } from '../storage/keys.js';
-import { getSVG } from '../utils/resources.js';
+import * as mutation from '../DOM/mutation';
+import * as layout from './utils';
+import * as storage from '../storage/simple';
+import { getElementBySelector, getElementById } from '../DOM/utils';
+import { MAX_VIDEO_SIZE } from '../storage/keys';
+import { getSVG } from '../utils/resources';
+import type { TabState } from '../link_state';
 
 export { init };
 
 
 // Keeps track of whether a listener has been added to a layout option or not
-/** @type {Map<string, boolean>} */
-const LISTENERS_STATE = new Map();
+const LISTENERS_STATE: Map<string, boolean> = new Map();
 
 /**
  * Adds a click event listener based on the layout type.
- *
- * @param {EventTarget} eventTarget
- * @param {string} layoutType - the name of the layout
  */
-function addListener(eventTarget, layoutType) {
+function addListener(eventTarget: EventTarget, layoutType: string) {
   const listenerState = typeof LISTENERS_STATE.get(layoutType) !== 'undefined';
   if (!listenerState) {
     eventTarget.addEventListener('click', () => changeLayout(layoutType));
@@ -27,35 +24,31 @@ function addListener(eventTarget, layoutType) {
 }
 
 
-/** @returns {Promise<number>} */
 async function getSideBarWidth() {
   const sideBar = await getElementBySelector('.overview-pane');
   return parseInt(window.getComputedStyle(sideBar).width, 10);
 }
 
 
-/** @returns {Promise<number>} */
 async function getVideoPlayerWidth() {
   const videoPlayer = await getElementById('video-player');
   return parseInt(videoPlayer.style.width, 10);
 }
 
-/** @returns {Promise<number>} */
+
 function getMaxVideoWidth() {
-  return storage.get(MAX_VIDEO_SIZE);
+  return storage.get(MAX_VIDEO_SIZE) as Promise<number>;
 }
 
 
 /**
  * Moves the sidebar either to the top or the bottom section
  *
- * @param {string} newLayout - the new layout that the UI should be changed into
+ * @param newLayout - the new layout that the UI should be changed into
  */
-async function moveSideBar(newLayout) {
-  /** @type {?HTMLElement} */
-  let parent = null;
-  /** @type {?HTMLElement} */
-  let sibling = null;
+async function moveSideBar(newLayout: string) {
+  let parent: HTMLElement | null = null;
+  let sibling: HTMLElement | null = null;
 
   if (layout.isRightSB(newLayout)) {
     // move the sidebar from the bottom to the top
@@ -67,15 +60,15 @@ async function moveSideBar(newLayout) {
     sibling = document.querySelector('.lower .nav-details');
     parent = document.querySelector('.center-pane .lower');
   }
-  /** @type {HTMLElement} */
-  const sideBar = document.querySelector('.overview-pane');
-  parent.insertBefore(sideBar, sibling);
+
+  const sideBar = document.querySelector('.overview-pane')! as HTMLElement;
+  parent!.insertBefore(sideBar, sibling);
 
   // Moving the sidebar requires the video player to be resized accordingly
 
   const videoWidth = await getVideoPlayerWidth();
   const sideBarWidth = await getSideBarWidth();
-  const videoPlayer = document.getElementById('video-player');
+  const videoPlayer = document.getElementById('video-player')!;
 
   if (layout.isRightSB(newLayout)) {
     // reduce size of video player
@@ -91,11 +84,11 @@ async function moveSideBar(newLayout) {
 }
 
 /**
- * @param {string} newLayout - the new layout that the UI should be changed into
- * @param {boolean} init - Check used to determine if the layout change is part
+ * @param newLayout - the new layout that the UI should be changed into
+ * @param init - Check used to determine if the layout change is part
  *    of the initialisation process.
  */
-async function changeLayout(newLayout, init = false) {
+async function changeLayout(newLayout: string, init = false) {
   const currentLayout = await layout.getCurrent();
   if (layout.isLeftSB(newLayout) || layout.isRightSB(newLayout)) {
     // Move the sidebar from the bottom to the top
@@ -107,10 +100,10 @@ async function changeLayout(newLayout, init = false) {
       const flex = (isLeftSB) ?
         'flex-direction: row;' : 'flex-direction: row-reverse;';
 
-      document.querySelector('.Watch.large').setAttribute('style', flex);
+      document.querySelector('.Watch.large')!.setAttribute('style', flex);
 
       // move the video player to the left or right
-      const videoPlayer = document.getElementById('video-player');
+      const videoPlayer = document.getElementById('video-player')!;
       const videoLeftStyle = `${await getSideBarWidth()}px`;
       videoPlayer.style.left = (isLeftSB) ? videoLeftStyle : '0px';
     }
@@ -122,8 +115,7 @@ async function changeLayout(newLayout, init = false) {
   if (layout.isRightSB(newLayout) && !init) {
     // close the options button
     // The init flag prevents this from opening the options button
-    /** @type {HTMLElement} */ (document.querySelector('.options-button')).
-      click();
+    (document.querySelector('.options-button')! as HTMLElement).click();
   }
 
   layout.setCurrent(newLayout);
@@ -135,7 +127,7 @@ async function changeLayout(newLayout, init = false) {
  */
 async function setExtraOption() {
   for (const element of layout.getOptions()) {
-    const firstChild = element.firstChild;
+    const firstChild = element.firstChild!;
     if (firstChild.textContent === 'Sidebar') {
       // Renaming the previous option as Sidebar Left
       firstChild.textContent = layout.Layouts.SIDEBAR_LEFT;
@@ -165,8 +157,6 @@ async function setExtraOption() {
 /**
  * Sets up the MutationObserver that checks on whether the user has selected the
  * option to change the layout.
- *
- * @returns {Promise<MutationObserver>}
  */
 async function getLayoutObserver() {
   const observer = new MutationObserver(async records => {
@@ -177,7 +167,7 @@ async function getLayoutObserver() {
 
       // Add eventListener to theatre option
       for (const option of layout.getOptions()) {
-        if (layout.isTheatre(option.firstChild.textContent)) {
+        if (layout.isTheatre(option.firstChild!.textContent!)) {
           addListener(option, layout.Layouts.THEATRE);
         }
       }
@@ -192,7 +182,7 @@ async function getLayoutObserver() {
 
         // Set the Right sidebar option as the selected one.
         for (const option of layout.getOptions()) {
-          if (option.firstChild.textContent === currentLayout) {
+          if (option.firstChild!.textContent === currentLayout) {
             option.classList.add('selected');
           }
         }
@@ -209,10 +199,8 @@ async function getLayoutObserver() {
 
 /**
  * The initialisation function
- *
- * @param {import('../link_state.js').TabStateDef} tabState
  */
-async function init(tabState) {
+async function init(tabState: TabState) {
   const result = await storage.get(MAX_VIDEO_SIZE);
   if (result === 'None') {
     // Setup the max video player size
@@ -220,7 +208,6 @@ async function init(tabState) {
     const notTheatre = layout.isLeftSB(currentLayout) ||
       layout.isRightSB(currentLayout);
 
-    /** @type {number} */
     let value = (notTheatre) ? (await getSideBarWidth()) : 0;
     value += (await getVideoPlayerWidth());
     storage.set(MAX_VIDEO_SIZE, value);

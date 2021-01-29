@@ -1,9 +1,9 @@
 'use strict';
 
-import * as link_state from '../modules/link_state.js';
-import * as stats from '../modules/stats/live.js';
-import * as sidebar from '../modules/layout/sidebar.js';
-import { getElementBySelector } from '../modules/DOM/utils.js';
+import * as link_state from '../modules/link_state';
+import * as stats from '../modules/stats/live';
+import * as sidebar from '../modules/layout/sidebar';
+import { getElementBySelector } from '../modules/DOM/utils';
 
 
 /* Currently the function works as intended but there are improvements that are
