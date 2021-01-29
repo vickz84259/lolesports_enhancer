@@ -127,7 +127,10 @@ rules:
     - consistent
   key-spacing: error
   keyword-spacing: error
-  lines-between-class-members: error
+  lines-between-class-members:
+    - error
+    - always
+    - exceptAfterSingleLine: true
   max-len:
     - error
     - code: 80
