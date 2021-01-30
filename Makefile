@@ -37,7 +37,8 @@ $(dest_files): $(build_dir)/%: $(src_dir)/% | $(dest_dirs)
 static: $(dest_files)
 
 $(dest_js_files): $(build_dir)/%.js: $(src_dir)/%.ts $(modules)
-	@npx rollup -i $< -o $@ -f iife -p typescript -p node-resolve
+	@npx rollup -i $< -o $@ -f iife -p typescript -p node-resolve \
+	-p "cleanup={comments: 'none'}"
 
 scripts: $(dest_js_files)
 
