@@ -1,17 +1,18 @@
-import { getElementBySelector } from '../DOM/utils.js';
-import { getSVG } from '../utils/resources.js';
-import { getTeamNames } from './statsInfo.js';
+import { getElementBySelector } from '../DOM/utils';
+import { getSVG } from '../utils/resources';
+import { getTeamNames } from './statsInfo';
 
+import type { TabState } from '../link_state';
+import type { StatsInfo } from './statsInfo';
 
-/** @typedef {import('./statsInfo.js').StatsInfo} StatsInfo */
 
 /**
- * @param {string} type - the type of HTML Element to be created
- * @param {string} className - the value of the class attribute for the element
+ * @param type - the type of HTML Element to be created
+ * @param className - the value of the class attribute for the element
  *
- * @returns {HTMLElement} the created element
+ * @returns the created element
  */
-function createElement(type, className) {
+function createElement(type: string, className: string) {
   const element = document.createElement(type);
   element.setAttribute('class', className);
 
@@ -22,12 +23,12 @@ function createElement(type, className) {
 /**
  * Creates a HTML element of type "div" with the given class name and content
  *
- * @param {string} className - the value of the class attribute for the div
- * @param {?string} [content] - the value of the textContent
+ * @param className - the value of the class attribute for the div
+ * @param [content] - the value of the textContent
  *
- * @returns {HTMLElement} the created div
+ * @returns the created div
 */
-function createContentDiv(className, content) {
+function createContentDiv(className: string, content?: string) {
   const div = createElement('div', className);
   div.textContent = (content) ? content : 'None';
 
@@ -35,13 +36,7 @@ function createContentDiv(className, content) {
 }
 
 
-/**
- * @param {StatsInfo} statsInfo
- * @param {string} optionName
- *
- * @returns {HTMLElement}
- */
-function createOption(statsInfo, optionName) {
+function createOption(statsInfo: StatsInfo, optionName: string) {
   const label = createElement('span', 'label');
   label.textContent = optionName;
 
@@ -54,9 +49,9 @@ function createOption(statsInfo, optionName) {
   option.appendChild(label);
 
   option.addEventListener('click', () => {
-    statsInfo.allyTeam = (optionName === 'None') ? null : optionName;
+    statsInfo.allyTeam = (optionName === 'None') ? '' : optionName;
 
-    const label = document.querySelector('.ally-section .label');
+    const label = document.querySelector('.ally-section .label')!;
     label.textContent = optionName;
 
     resetOptions();
@@ -71,7 +66,7 @@ function resetOptions() {
   if (allyOptions) {
     allyOptions.remove();
 
-    const parent = document.querySelector('.watch-options .main-menu');
+    const parent = document.querySelector('.watch-options .main-menu')!;
     for (let index = parent.children.length - 1; index >= 0; --index) {
       parent.children[index].removeAttribute('hidden');
     }
@@ -79,17 +74,12 @@ function resetOptions() {
 }
 
 
-/**
- * @param {StatsInfo} statsInfo
- *
- * @returns {function(): Promise<void>}
- */
-function getAllySectionHandler(statsInfo) {
+function getAllySectionHandler(statsInfo: StatsInfo) {
   return async function handler() {
-    const watchOptions = document.querySelector('.WatchOptions');
+    const watchOptions = document.querySelector('.WatchOptions')!;
     watchOptions.classList.add('active');
 
-    const parent = document.querySelector('.watch-options .main-menu');
+    const parent = document.querySelector('.watch-options .main-menu')!;
     for (let index = parent.children.length - 1; index >= 0; --index) {
       parent.children[index].setAttribute('hidden', '');
     }
@@ -109,15 +99,14 @@ function getAllySectionHandler(statsInfo) {
 }
 
 
-/** @param {StatsInfo} statsInfo */
-async function addAllySection(statsInfo) {
+async function addAllySection(statsInfo: StatsInfo) {
   if (!document.querySelector('.ally-section')) {
     const optionDiv = createElement('div', 'option');
     optionDiv.appendChild(createContentDiv('label', statsInfo.allyTeam));
     optionDiv.addEventListener('click', getAllySectionHandler(statsInfo));
 
     const rightCaret = await getSVG('img/right_caret.svg');
-    // @ts-ignore
+    // @ts-expect-error
     optionDiv.insertAdjacentHTML('beforeend', DOMPurify.sanitize(rightCaret));
 
     const optionsList = createElement('div', 'options-list');
@@ -136,8 +125,7 @@ async function addAllySection(statsInfo) {
 async function getOptionsObserver() {
   const observer = new MutationObserver(records => {
 
-    /** @type {Element} */
-    const target = (records[0].target);
+    const target = records[0].target as Element;
     if (!target.classList.contains('active')) {
       resetOptions();
     }
@@ -149,11 +137,7 @@ async function getOptionsObserver() {
 }
 
 
-/**
- * @param {import('../link_state.js').TabStateDef} tabState
- * @param {StatsInfo} statsInfo
- */
-export async function init(tabState, statsInfo) {
+export async function init(tabState: TabState, statsInfo: StatsInfo) {
   const optionsBtn = await getElementBySelector('.options-button');
   optionsBtn.addEventListener('click', () => addAllySection(statsInfo));
 

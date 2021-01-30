@@ -1,68 +1,61 @@
-/**
- * Properties related to a content script
- * @typedef {Object} Properties
- * @property {string} portName - The name of the content script
- * @property {RegExp} regexPattern - The regex pattern determining the url that
- *    the content script considers valid
- * @property {(function(TabState): void) []} init_functions -
- *    Functions called when the user navigates to a url matching regexPattern
- * @property {(function(): void) []} cleanup_functions - Functions called when
- *    the user navigates to a url that doesn't match regexPattern
-*/
-
-/**
- * @typedef {Object} TabStateDef
- * @property {function(MutationObserver): void} addObserver
- */
-
 /** Class used to keep track of Mutation observer objects in content scripts */
-class TabState {
+export class TabState {
+  readonly observers: MutationObserver[];
 
   constructor() {
-    /** @private @const @type {MutationObserver[]} */
     this.observers = [];
   }
 
-  /** @param {MutationObserver} observer */
-  addObserver(observer) {
+  addObserver(observer: MutationObserver) {
     this.observers.push(observer);
   }
+}
+
+// Properties related to a content script
+interface Properties {
+  portName: string; // The name of the content script
+
+  // The regex pattern determining the url that the content script considers
+  // valid
+  regexPattern: RegExp;
+
+  // Functions called when the user navigates to a url matching regexPattern
+  init_functions: ((tabState: TabState) => void)[];
+
+  // Functions called when the user navigates to a url that doesn't match
+  // regexPattern
+  cleanup_functions: (() => void)[];
+}
+
+interface Message {
+  url: string;
 }
 
 /**
  * Function called by each content script when it is loaded on to a webpage.
  * It initiates a connection with the navigation.js background script and setups
  * a handler for the navigation messages
- *
- * @param {Properties} properties
  */
-export function connect(properties) {
+export function connect(properties: Properties) {
   // Creating a connection to the background script
   const port = browser.runtime.connect({ name: properties.portName });
   const msgHandler = getHandler(properties);
-  // @ts-ignore
-  port.onMessage.addListener(message => msgHandler(message));
+
+  port.onMessage.addListener((message: any) => msgHandler(message));
 }
 
 /**
  * Initialises and returns the navigation message handler.
- *
- * @param {Properties} properties
- *
- * @returns {function({url: string}): void}
  */
-function getHandler(properties) {
+function getHandler(properties: Properties) {
   // Keep track of the page the tab user visited and is currently on
-  /** @type {?string} */
-  let previousLink = null;
-
-  /** @type {?string} */
-  let currentLink = null;
+  let previousLink = '';
+  let currentLink = '';
 
   const tabState = new TabState();
 
-  return function handler(message) {
-    if (currentLink) previousLink = currentLink;
+  return function handler(message: Message) {
+    previousLink = currentLink;
     currentLink = message.url;
 
     const matchesPrevious = properties.regexPattern.test(previousLink);
