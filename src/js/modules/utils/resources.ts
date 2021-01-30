@@ -24,13 +24,13 @@ export async function getSVG(path: string): Promise<string> {
  * with a particular scenario
  */
 interface AnnouncerScenarios {
-  [key: string]: number[]
+  [key: string]: number[];
 }
 
 interface AnnouncerJson {
   // array containing the various locales for the specified announcer
-  languages: string[]
-  categories: AnnouncerScenarios
+  languages: string[];
+  categories: AnnouncerScenarios;
 }
 
 /**

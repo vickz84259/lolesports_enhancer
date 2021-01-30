@@ -48,13 +48,13 @@ function main() {
 
 // Contains details about the navigation event.
 interface NavigationDetails {
-  tabId: number, // The ID of the tab in which the navigation is about to occur.
-  url: string, // The URL to which the given frame will navigate.
-  processId: number,
-  frameId: number,
-  timeStamp: number,
-  transitionType: browser.webNavigation.TransitionType,
-  transitionQualifiers: browser.webNavigation.TransitionQualifier[]
+  tabId: number; // The ID of the tab in which the navigation is about to occur.
+  url: string; // The URL to which the given frame will navigate.
+  processId: number;
+  frameId: number;
+  timeStamp: number;
+  transitionType: browser.webNavigation.TransitionType;
+  transitionQualifiers: browser.webNavigation.TransitionQualifier[];
 }
 
 /**

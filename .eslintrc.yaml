@@ -28,6 +28,54 @@ extends: eslint:recommended
 reportUnusedDisableDirectives: true
 
 rules:
+  # Typescript specific rules
+  '@typescript-eslint/member-delimiter-style':
+    - error
+  '@typescript-eslint/array-type':
+    - error
+  '@typescript-eslint/adjacent-overload-signatures':
+    - error
+  '@typescript-eslint/prefer-ts-expect-error':
+    - error
+  '@typescript-eslint/consistent-type-imports':
+    - error
+  '@typescript-eslint/no-invalid-void-type':
+    - error
+  '@typescript-eslint/no-misused-new':
+    - error
+  '@typescript-eslint/no-this-alias':
+    - error
+
+  '@typescript-eslint/comma-spacing':
+    - error
+  '@typescript-eslint/default-param-last':
+    - error
+  '@typescript-eslint/func-call-spacing':
+    - error
+  '@typescript-eslint/keyword-spacing':
+    - error
+  '@typescript-eslint/no-array-constructor':
+    - error
+  '@typescript-eslint/no-duplicate-imports':
+    - error
+  '@typescript-eslint/no-extra-semi':
+    - error
+  '@typescript-eslint/no-invalid-this':
+    - error
+  '@typescript-eslint/no-unused-vars':
+    - error
+    - varsIgnorePattern: ^_$
+  '@typescript-eslint/no-use-before-define':
+    - error
+    - nofunc
+  '@typescript-eslint/semi':
+    - error
+  '@typescript-eslint/space-before-function-paren':
+    - error
+    - never
+
+  no-extra-semi: 'off'
+
   no-await-in-loop: warn
   no-import-assign: error
   no-template-curly-in-string: error
@@ -44,7 +92,7 @@ rules:
     - multi-line
     - consistent
   default-case: error
-  default-param-last: error
+  default-param-last: 'off'
   dot-location:
     - error
     - object
@@ -54,7 +102,7 @@ rules:
     - error
     - allowElseIf: false
   no-implicit-coercion: error
-  no-invalid-this: error
+  no-invalid-this: 'off'
   no-loop-func: error
   no-multi-spaces:
     - warn
@@ -78,7 +126,7 @@ rules:
   no-undef-init: error
   no-undefined: error
   no-use-before-define:
-    - error
+    - 'off'
     - nofunc
 
   # Stylistic issues
@@ -90,14 +138,14 @@ rules:
     - consistent
   block-spacing: error
   brace-style: error
-  comma-spacing: error
+  comma-spacing: 'off'
   comma-style: error
   computed-property-spacing: error
   eol-last: error
   function-paren-newline:
     - warn
     - multiline
-  func-call-spacing: error
+  func-call-spacing: 'off'
   func-name-matching: error
   func-names:
     - error
@@ -126,7 +174,7 @@ rules:
     - error
     - consistent
   key-spacing: error
-  keyword-spacing: error
+  keyword-spacing: 'off'
   lines-between-class-members:
     - error
     - always
@@ -148,7 +196,7 @@ rules:
   no-tabs: error
   no-trailing-spaces: error
   no-new-object: error
-  no-array-constructor: error
+  no-array-constructor: 'off'
   no-unneeded-ternary: error
   no-whitespace-before-property: error
   nonblock-statement-body-position:
@@ -187,7 +235,7 @@ rules:
   quotes:
     - error
     - single
-  semi: error
+  semi: 'off'
   semi-spacing: error
   semi-style: error
   space-before-blocks: error
@@ -210,8 +258,7 @@ rules:
     - after
   no-confusing-arrow: error
   no-duplicate-imports:
-    - error
-    - includeExports: true
+    - 'off'
   no-useless-computed-key:
     - error
   no-useless-constructor: error
@@ -231,6 +278,6 @@ rules:
     - error
     - checkLoops: false
   no-unused-vars:
-    - error
+    - 'off'
     - varsIgnorePattern: ^_$
   prefer-const: error

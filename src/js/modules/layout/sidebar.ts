@@ -147,7 +147,7 @@ async function setExtraOption() {
   layout.getOptionsList().appendChild(newOption);
 
   const sidebarSVG = await getSVG('img/right_sidebar.svg');
-  // @ts-ignore
+  // @ts-expect-error
   newOption.insertAdjacentHTML('beforeend', DOMPurify.sanitize(sidebarSVG));
 
   addListener(newOption, layout.Layouts.SIDEBAR_RIGHT);

@@ -1,7 +1,9 @@
 import { getElementBySelector } from '../DOM/utils';
 import { getSVG } from '../utils/resources';
-import { getTeamNames, StatsInfo } from './statsInfo';
+import { getTeamNames } from './statsInfo';
+
 import type { TabState } from '../link_state';
+import type { StatsInfo } from './statsInfo';
 
 
 /**
@@ -104,7 +106,7 @@ async function addAllySection(statsInfo: StatsInfo) {
     optionDiv.addEventListener('click', getAllySectionHandler(statsInfo));
 
     const rightCaret = await getSVG('img/right_caret.svg');
-    // @ts-ignore
+    // @ts-expect-error
     optionDiv.insertAdjacentHTML('beforeend', DOMPurify.sanitize(rightCaret));
 
     const optionsList = createElement('div', 'options-list');

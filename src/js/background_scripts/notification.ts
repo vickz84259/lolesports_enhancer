@@ -7,8 +7,8 @@ function createNotification(message: string) {
 
 interface Message {
   // The background script meant to receive a particular message
-  destination: string
-  data: string // The data to be sent
+  destination: string;
+  data: string; // The data to be sent
 }
 
 

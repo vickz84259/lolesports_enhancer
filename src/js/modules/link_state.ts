@@ -13,22 +13,22 @@ export class TabState {
 
 // Properties related to a content script
 interface Properties {
-  portName: string, // The name of the content script
+  portName: string; // The name of the content script
 
   // The regex pattern determining the url that the content script considers
   // valid
-  regexPattern: RegExp,
+  regexPattern: RegExp;
 
   // Functions called when the user navigates to a url matching regexPattern
-  init_functions: ((tabState: TabState) => void)[] // eslint-disable-line
+  init_functions: ((tabState: TabState) => void)[];
 
   // Functions called when the user navigates to a url that doesn't match
   // regexPattern
-  cleanup_functions: (() => void)[]
+  cleanup_functions: (() => void)[];
 }
 
 interface Message {
-  url: string
+  url: string;
 }
 
 /**

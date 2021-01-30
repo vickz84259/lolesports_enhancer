@@ -3,8 +3,8 @@ export {
   setToStorage as set
 };
 
-type StorageType = browser.storage.StorageName
-type StorageValue = browser.storage.StorageValue
+type StorageType = browser.storage.StorageName;
+type StorageValue = browser.storage.StorageValue;
 
 function assertStorageType(storageType: string): void {
   const storageTypes = ['local', 'sync', 'managed'];

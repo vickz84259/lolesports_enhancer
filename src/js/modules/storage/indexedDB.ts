@@ -1,4 +1,6 @@
-import { DBSchema, IDBPDatabase, openDB } from 'idb';
+import { openDB } from 'idb';
+
+import type { DBSchema, IDBPDatabase } from 'idb';
 
 const DB_NAME = 'announcersDB';
 const OBJ_STORE = 'announcersStore';
@@ -7,9 +9,9 @@ const DB_VERSION = 1;
 
 interface AnnnouncersDB extends DBSchema {
   announcersStore: {
-    key: string,
-    value: ArrayBuffer
-  }
+    key: string;
+    value: ArrayBuffer;
+  };
 }
 
 export type Database = IDBPDatabase<AnnnouncersDB>;

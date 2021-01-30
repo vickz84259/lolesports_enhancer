@@ -91,7 +91,7 @@ export async function checkFiles() {
  * particular scenario
  */
 export interface AnnouncerScenarioFiles {
-  [key: string]: string[]
+  [key: string]: string[];
 }
 
 
